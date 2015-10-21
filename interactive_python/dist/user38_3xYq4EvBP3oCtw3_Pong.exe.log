@@ -1,0 +1,22 @@
+C:\Users\YuHow5566\Documents\coursera\interactive_python_201409\dist\library.zip\SimpleGUICS2Pygame\simpleguics2pygame.py:40: RuntimeWarning: import display: No module named _view
+(ImportError: No module named _view)
+C:\Users\YuHow5566\Documents\coursera\interactive_python_201409\dist\library.zip\SimpleGUICS2Pygame\simpleguics2pygame.py:40: RuntimeWarning: import draw: No module named _view
+(ImportError: No module named _view)
+C:\Users\YuHow5566\Documents\coursera\interactive_python_201409\dist\library.zip\SimpleGUICS2Pygame\simpleguics2pygame.py:40: RuntimeWarning: import image: No module named _view
+(ImportError: No module named _view)
+C:\Users\YuHow5566\Documents\coursera\interactive_python_201409\dist\library.zip\SimpleGUICS2Pygame\simpleguics2pygame.py:40: RuntimeWarning: import pixelcopy: No module named _view
+(ImportError: No module named _view)
+C:\Users\YuHow5566\Documents\coursera\interactive_python_201409\dist\library.zip\SimpleGUICS2Pygame\simpleguics2pygame.py:40: RuntimeWarning: import transform: No module named _view
+(ImportError: No module named _view)
+Traceback (most recent call last):
+  File "user38_3xYq4EvBP3oCtw3_Pong.py", line 7, in <module>
+  File "SimpleGUICS2Pygame\simpleguics2pygame.pyc", line 59, in <module>
+  File "pygame\font.pyc", line 12, in <module>
+  File "pygame\font.pyc", line 10, in __load
+ImportError: DLL load failed: 找不到指定的模組。
+Traceback (most recent call last):
+  File "user38_3xYq4EvBP3oCtw3_Pong.py", line 7, in <module>
+  File "SimpleGUICS2Pygame\simpleguics2pygame.pyc", line 59, in <module>
+  File "pygame\font.pyc", line 12, in <module>
+  File "pygame\font.pyc", line 10, in __load
+ImportError: DLL load failed: 找不到指定的模組。
