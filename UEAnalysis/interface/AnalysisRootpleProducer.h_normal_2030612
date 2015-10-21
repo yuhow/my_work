@@ -1,0 +1,740 @@
+#ifndef AnalysisRootpleProducer_H
+#define AnalysisRootpleProducer_H
+
+#include <memory>
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <math.h>
+
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "JetMETCorrections/Objects/interface/JetCorrector.h"
+#include "JetMETCorrections/Modules/interface/JetCorrectionService.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+
+// jet ID
+#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
+#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
+
+#include <FWCore/Framework/interface/Event.h>
+#include <FWCore/Framework/interface/ESHandle.h>
+#include <FWCore/Framework/interface/MakerMacros.h>
+#include <FWCore/Framework/interface/Frameworkfwd.h>
+#include <FWCore/ParameterSet/interface/ParameterSet.h>
+#include <DataFormats/Common/interface/Handle.h>
+
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+
+#include <FWCore/ServiceRegistry/interface/Service.h>
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
+#include <TROOT.h>
+#include <TTree.h>
+#include <TFile.h>
+#include <TLorentzVector.h>
+#include <TVector.h>
+#include <TObjString.h>
+#include <TClonesArray.h>
+#include <TH2D.h>
+
+#include "DataFormats/JetReco/interface/Jet.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
+#include "DataFormats/JetReco/interface/GenJetCollection.h"
+#include "DataFormats/JetReco/interface/CaloJetCollection.h"
+#include "DataFormats/JetReco/interface/BasicJet.h"
+#include "DataFormats/JetReco/interface/BasicJetCollection.h"
+#include "DataFormats/JetReco/interface/TrackJet.h"
+#include "DataFormats/JetReco/interface/TrackJetCollection.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+//#include "RecoPixelVertexing/PixelVertexFinding/interface/PVClusterComparer.h"
+
+
+// track
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+
+
+
+#include "DataFormats/Candidate/interface/LeafCandidate.h"
+
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
+
+// access trigger results
+#include <FWCore/Common/interface/TriggerNames.h>
+#include <DataFormats/Common/interface/TriggerResults.h>
+#include <DataFormats/HLTReco/interface/TriggerEvent.h> 
+#include <DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h>
+
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+#include <DataFormats/HLTReco/interface/TriggerEvent.h>
+#include <DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h>
+#include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenuFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetupFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+
+//handle recHits and clusters: maybe some package are redundant
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/ProjectedSiStripRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
+#include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2DCollection.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DCollection.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+
+// For Photon
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/EgammaReco/interface/PreshowerCluster.h"
+#include "DataFormats/EgammaReco/interface/PreshowerClusterFwd.h"
+
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
+#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgoRcd.h"
+#include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
+#include "CommonTools/Utils/interface/PtComparator.h"
+//#include "RecoEgamma/EgammaTools/interface/ConversionLikelihoodCalculator.h"
+#include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
+#include "DataFormats/HcalDetId/interface/HcalSubdetector.h"
+
+//geometry
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
+
+#include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
+#include "Geometry/EcalAlgo/interface/EcalPreshowerGeometry.h"
+
+//Candidate
+#include "DataFormats/Candidate/interface/Candidate.h"
+
+#include <Math/VectorUtil.h>
+
+
+//PATObject
+#include "DataFormats/PatCandidates/interface/PATObject.h"
+
+#include "PhysicsTools/SelectorUtils/interface/strbitset.h"
+
+
+// pile up summary info.
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
+#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
+
+using namespace edm;
+using namespace reco;
+using namespace trigger;
+using std::vector;
+
+class TTree;
+class TFile;
+class TObject;
+
+
+
+class AnalysisRootpleProducer : public edm::EDAnalyzer
+{
+  
+
+public:
+  
+  //
+  explicit AnalysisRootpleProducer( const edm::ParameterSet& ) ;
+  virtual ~AnalysisRootpleProducer() {} // no need to delete ROOT stuff
+  // as it'll be deleted upon closing TFile
+
+  virtual void analyze( const edm::Event& e, const edm::EventSetup &es ) ;
+  virtual void beginJob() ;
+  virtual void endJob() ;
+  
+  math::XYZPoint vtx_;
+  typedef math::XYZPoint Point;
+
+  //Point vtx_ ;
+
+  void fillEventInfo(int);
+  void store();
+
+
+protected:
+
+  virtual Int_t getNumOfPreshClusters(reco::Photon &photon, const edm::Event&);
+  virtual Float_t getESRatio(reco::Photon &photon, const edm::Event&, const edm::EventSetup&);
+
+  virtual Float_t getGenCalIso(edm::Handle<reco::GenParticleCollection> handle,
+			        std::vector<GenParticle>::const_iterator thisPho, const Float_t dRMax=0.4, bool removeMu=true, bool removeNu=false);
+
+  virtual Int_t JetVertexAssociation(edm::Handle<reco::VertexCollection> pvtxHandle, std::vector<reco::Vertex> vtxVector, std::vector<reco::PFJet>::const_iterator thisJet);
+  
+private:
+
+  bool isMC;
+  bool is2010DATA;
+  bool is2011DATA;  
+  bool onlyRECO;
+  bool have_PILEUP;
+
+
+  InputTag genJetCollName; // label of Jet made with MC particles
+  InputTag genPartCollName ;  //for photon+jet analysis
+
+  Handle< GenParticleCollection > CandHandleMCGamma  ;
+  Handle< GenJetCollection    > GenJetsHandle ;
+
+  InputTag triggerResultsTag;
+  InputTag triggerEventTag;
+
+  InputTag photonProducer_;  //for photon+jet analysis
+
+  int          pdgId_;            // PDG ID of expected MC particle
+  std::vector<int> otherPdgIds_;  // PDG ID of other MC particles to match
+
+  edm::InputTag ebReducedRecHitCollection_;
+  edm::InputTag eeReducedRecHitCollection_;
+
+  double   ecalBarrelMaxEta_; // Begining of ECAL Barrel/Endcap gap
+  double   ecalEndcapMinEta_; // End of ECAL Barrel/Endcap gap
+
+  InputTag pfJetCollName;    //for PFJet 
+
+  Handle< TriggerResults      > triggerResults;
+  Handle< TriggerEvent        > triggerEvent;
+  Handle< PhotonCollection    > photons;
+  Handle< PhotonCollection    > photons_match;
+  Handle< reco::PFJetCollection     > NOcutPFJetsHandle;
+  Handle< reco::PFJetCollection     > LOOSEPFJetsHandle;
+  Handle< reco::PFJetCollection     > TIGHTPFJetsHandle;
+
+  TriggerNames triggerNames;
+
+  float piG;
+
+  //Event_selection
+  TH1D* h_number_vertex_original;
+  TH1D* h_number_vertex;
+  TH1D* h_number_interaction_original;
+  TH1D* h_number_interaction;
+
+  //Photon_property
+  TH1D* h_pT_leadingPhoton_B;
+  TH1D* h_pT_leadingPhoton_E;
+  TH1D* h_eta_leadingPhoton_B;
+  TH1D* h_eta_leadingPhoton_E;
+  TH1D* h_phi_leadingPhoton_B;
+  TH1D* h_phi_leadingPhoton_E;
+
+  //jet_property
+  TH1D* h_multiplicity_jet;
+
+  TH1D* h_pT_leading1stjet;
+  TH1D* h_eta_leading1stjet;
+  TH1D* h_phi_leading1stjet;
+  TH1D* h_pT_leading2ndjet;
+  TH1D* h_eta_leading2ndjet;
+  TH1D* h_phi_leading2ndjet;
+  TH1D* h_pT_leading3rdjet;
+  TH1D* h_eta_leading3rdjet;
+  TH1D* h_phi_leading3rdjet;
+
+  //validation
+  //an_11_128
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_0jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_0jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_1jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_1jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_2jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_2jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_3jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_3jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_4jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_4jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_5jets_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_5jets_Signal;
+  //an_11_128
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_0jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_0jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_1jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_1jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_2jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_2jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_3jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_3jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_4jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_4jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_5jets_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_5jets_BG;
+
+  //an_10_268
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_55_60_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_55_60_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_60_85_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_60_85_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_85_120_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_85_120_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_120_300_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_120_300_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_300_inf_Signal;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_300_inf_Signal;
+  //an_10_268
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_55_60_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_55_60_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_60_85_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_60_85_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_85_120_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_85_120_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_120_300_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_120_300_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_300_inf_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_300_inf_BG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_55_60_truthBG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_55_60_truthBG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_60_85_truthBG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_60_85_truthBG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_85_120_truthBG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_85_120_truthBG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_120_300_truthBG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_120_300_truthBG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_B_300_inf_truthBG;
+  TH1D* h_SigmaIetaIeta_leadingPhoton_E_300_inf_truthBG;
+
+
+  TH1D* h_selection_eff;
+  TH1D* h_photonID_individual_B;
+  TH1D* h_photonID_individual_E;
+  TH1D* h_photon_selection_rate_B;
+  TH1D* h_photon_selection_rate_E;
+
+  TH1D* h_number_photon_pTcut_55_B; 
+  TH1D* h_number_photon_pTcut_55_E; 
+  TH1D* h_pT_leadingphoton_pTcut_55_B;
+  TH1D* h_pT_leadingphoton_pTcut_55_E;
+
+  TH1D* h_number_jet_pTcut_50;
+  TH1D* h_pT_leadingjet_pTcut_50;
+
+  TH1D* h_number_jet_pTcut_20 ;
+  TH1D* h_pTsum_trailingjet_pTcut_20;
+
+  TH1D* h_S_CDFpt_gen_v1;
+  TH1D* h_dS_CDFpt_gen_v1;
+  TH1D* h_dPhi2ndJet3rdJet_gen_v1;
+
+  TH1D* h_S_CDFpt_gen_v2;
+  TH1D* h_dS_CDFpt_gen_v2;
+  TH1D* h_dPhi2ndJet3rdJet_gen_v2;
+
+  TH2D* h_dS_comparison_v1;
+  TH2D* h_dPhi_comparison_v1;
+
+  TH2D* h_dS_comparison_v2;
+  TH2D* h_dPhi_comparison_v2;
+
+  TH1D* h_deltadS_all_v1;
+  TH1D* h_deltadPhi_all_v1;
+
+  TH1D* h_deltadS_all_v2;
+  TH1D* h_deltadPhi_all_v2;
+
+  TH1D* h_pT_imbalance_G_Jet1_gen_v1; 
+  TH1D* h_pT_imbalance_Jet2_Jet3_gen_v1;
+  TH1D* h_pT_imbalance_overall_gen_v1;
+
+  TH1D* h_pT_imbalance_G_Jet1_gen_v2; 
+  TH1D* h_pT_imbalance_Jet2_Jet3_gen_v2;
+  TH1D* h_pT_imbalance_overall_gen_v2;
+
+  TH2D* h_pT_imbalance_G_Jet1_comparison_v1; 
+  TH2D* h_pT_imbalance_Jet2_Jet3_comparison_v1;
+  TH2D* h_pT_imbalance_overall_comparison_v1;
+
+  TH2D* h_pT_imbalance_G_Jet1_comparison_v2; 
+  TH2D* h_pT_imbalance_Jet2_Jet3_comparison_v2;
+  TH2D* h_pT_imbalance_overall_comparison_v2;
+
+  TH1D* h_pT_resolution_photon_v1; 
+  TH1D* h_pT_resolution_jet1_v1;
+  TH1D* h_pT_resolution_jet2_v1; 
+  TH1D* h_pT_resolution_jet3_v1; 
+  TH1D* h_deltaR_photon_Gen_Reco_v1;
+  TH1D* h_deltaR_jet1_Gen_Reco_v1;
+  TH1D* h_deltaR_jet2_Gen_Reco_v1;
+  TH1D* h_deltaR_jet3_Gen_Reco_v1;
+
+  TH1D* h_pT_resolution_photon_v2; 
+  TH1D* h_pT_resolution_jet1_v2; 
+  TH1D* h_pT_resolution_jet2_v2; 
+  TH1D* h_pT_resolution_jet3_v2; 
+  TH1D* h_deltaR_photon_Gen_Reco_v2;
+  TH1D* h_deltaR_jet1_Gen_Reco_v2;
+  TH1D* h_deltaR_jet2_Gen_Reco_v2;
+  TH1D* h_deltaR_jet3_Gen_Reco_v2;
+
+  TH1D* h_recodS_Fixed_gendS_range1_v1;
+  TH1D* h_recodS_Fixed_gendS_range2_v1;
+  TH1D* h_recodS_Fixed_gendS_range3_v1;
+  TH1D* h_recodS_Fixed_gendS_range4_v1;
+  TH1D* h_recodS_Fixed_gendS_range5_v1;
+  TH1D* h_recodS_Fixed_gendS_range6_v1;
+  TH1D* h_recodS_Fixed_gendS_range7_v1;
+  TH1D* h_recodS_Fixed_gendS_range8_v1;
+  TH1D* h_recodS_Fixed_gendS_range9_v1;
+  TH1D* h_recodS_Fixed_gendS_range10_v1;
+  TH1D* h_deltadS_Fixed_gendS_range1_v1;
+  TH1D* h_deltadS_Fixed_gendS_range2_v1;
+  TH1D* h_deltadS_Fixed_gendS_range3_v1;
+  TH1D* h_deltadS_Fixed_gendS_range4_v1;
+  TH1D* h_deltadS_Fixed_gendS_range5_v1;
+  TH1D* h_deltadS_Fixed_gendS_range6_v1;
+  TH1D* h_deltadS_Fixed_gendS_range7_v1;
+  TH1D* h_deltadS_Fixed_gendS_range8_v1;
+  TH1D* h_deltadS_Fixed_gendS_range9_v1;
+  TH1D* h_deltadS_Fixed_gendS_range10_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range1_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range2_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range3_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range4_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range5_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range6_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range7_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range8_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range9_v1;
+  TH1D* h_deltadPhi_Fixed_gendS_range10_v1;
+
+  TH1D* h_recodS_Fixed_gendS_range1_v2;
+  TH1D* h_recodS_Fixed_gendS_range2_v2;
+  TH1D* h_recodS_Fixed_gendS_range3_v2;
+  TH1D* h_recodS_Fixed_gendS_range4_v2;
+  TH1D* h_recodS_Fixed_gendS_range5_v2;
+  TH1D* h_recodS_Fixed_gendS_range6_v2;
+  TH1D* h_recodS_Fixed_gendS_range7_v2;
+  TH1D* h_recodS_Fixed_gendS_range8_v2;
+  TH1D* h_recodS_Fixed_gendS_range9_v2;
+  TH1D* h_recodS_Fixed_gendS_range10_v2;
+  TH1D* h_deltadS_Fixed_gendS_range1_v2;
+  TH1D* h_deltadS_Fixed_gendS_range2_v2;
+  TH1D* h_deltadS_Fixed_gendS_range3_v2;
+  TH1D* h_deltadS_Fixed_gendS_range4_v2;
+  TH1D* h_deltadS_Fixed_gendS_range5_v2;
+  TH1D* h_deltadS_Fixed_gendS_range6_v2;
+  TH1D* h_deltadS_Fixed_gendS_range7_v2;
+  TH1D* h_deltadS_Fixed_gendS_range8_v2;
+  TH1D* h_deltadS_Fixed_gendS_range9_v2;
+  TH1D* h_deltadS_Fixed_gendS_range10_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range1_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range2_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range3_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range4_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range5_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range6_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range7_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range8_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range9_v2;
+  TH1D* h_deltadPhi_Fixed_gendS_range10_v2;
+
+  TH1D* h_deltadS_Fixed_gendPhi_range1_v1;
+  TH1D* h_deltadS_Fixed_gendPhi_range2_v1;
+  TH1D* h_deltadS_Fixed_gendPhi_range3_v1;
+  TH1D* h_deltadS_Fixed_gendPhi_range4_v1;
+  TH1D* h_deltadS_Fixed_gendPhi_range5_v1;
+  TH1D* h_deltadS_Fixed_gendPhi_range6_v1;
+  TH1D* h_deltadS_Fixed_gendPhi_range7_v1;
+  TH1D* h_deltadS_Fixed_gendPhi_range8_v1;
+  TH1D* h_deltadS_Fixed_gendPhi_range9_v1;
+  TH1D* h_deltadS_Fixed_gendPhi_range10_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range1_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range2_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range3_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range4_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range5_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range6_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range7_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range8_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range9_v1;
+  TH1D* h_recodPhi_Fixed_gendPhi_range10_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range1_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range2_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range3_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range4_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range5_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range6_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range7_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range8_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range9_v1;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range10_v1;
+
+  TH1D* h_deltadS_Fixed_gendPhi_range1_v2;
+  TH1D* h_deltadS_Fixed_gendPhi_range2_v2;
+  TH1D* h_deltadS_Fixed_gendPhi_range3_v2;
+  TH1D* h_deltadS_Fixed_gendPhi_range4_v2;
+  TH1D* h_deltadS_Fixed_gendPhi_range5_v2;
+  TH1D* h_deltadS_Fixed_gendPhi_range6_v2;
+  TH1D* h_deltadS_Fixed_gendPhi_range7_v2;
+  TH1D* h_deltadS_Fixed_gendPhi_range8_v2;
+  TH1D* h_deltadS_Fixed_gendPhi_range9_v2;
+  TH1D* h_deltadS_Fixed_gendPhi_range10_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range1_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range2_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range3_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range4_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range5_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range6_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range7_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range8_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range9_v2;
+  TH1D* h_recodPhi_Fixed_gendPhi_range10_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range1_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range2_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range3_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range4_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range5_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range6_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range7_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range8_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range9_v2;
+  TH1D* h_deltadPhi_Fixed_gendPhi_range10_v2;
+
+  //DPS_analysis
+  TH1D* h_dPhiGamma1stJet;
+  TH1D* h_dPhiGamma2ndJet;
+  TH1D* h_dPhiGamma3rdJet;
+  TH1D* h_dPhi1stJet2ndJet;
+  TH1D* h_dPhi1stJet3rdJet;
+  TH1D* h_dPhi2ndJet3rdJet;
+  TH1D* h_MaxEta_Jet;
+  TH1D* h_MinPt_Jet;
+  TH1D* h_pT_G_Jet1;
+  TH1D* h_pT_Jet2_Jet3;
+  TH1D* h_pT_imbalance_G_Jet1;
+  TH1D* h_pT_imbalance_Jet2_Jet3;
+  TH1D* h_pT_imbalance_overall;
+  TH1D* h_ratio_EtJ1_EtG;
+  TH1D* h_ratio_EtJ3_EtJ2;
+  TH1D* h_S_CDFpt;
+  TH1D* h_dS_CDFpt;
+
+  //special study of jet cleaning
+  TH1D* h_dR_jet_photon_inCone5;
+  TH1D* h_jetpT_photon_inCone5;
+  TH1D* h_dR_jet_photon_outCone5;
+  TH1D* h_jetpT_photon_outCone5;
+  TH2D* h_photonpT_vs_Jetmultiplicity_inCone5;
+
+  TTree* AnalysisTree;   //for all events
+  int eventNum_RAW;
+  int lumiBlock_RAW;
+  int runNumber_RAW;
+  int bx_RAW;
+  double intrisic_weight_RAW;
+  float n_interactions_RAW;
+  float ave_nvtx_RAW;
+  float pile_up_weight_RAW;
+  double trkPt_squareSum_2ndVtx_RAW;
+  int n_vertex_RAW;
+
+  int selection_number_RAW;  
+ 
+  double pT_leadingPhoton_RAW;
+
+  TTree* DPS_AnalysisTree;   //for photon+3jet events
+
+  // GEN Level //
+  //info of event
+  double gen_intrisic_weight;
+  int    gen_n_jet_pt20;
+  int    gen_n_jet_pt75;
+  int    gen_is_DPS_event;
+  //photon info
+  double genIsoDR04;
+  double gen_pT_leadingPhoton;
+  double gen_eta_leadingPhoton;
+  double gen_phi_leadingPhoton;
+  //jet info
+  double gen_pT_leading1stJet;
+  double gen_eta_leading1stJet;
+  double gen_phi_leading1stJet;
+  double gen_pT_leading2ndJet;
+  double gen_eta_leading2ndJet;
+  double gen_phi_leading2ndJet;
+  double gen_pT_leading3rdJet;
+  double gen_eta_leading3rdJet;
+  double gen_phi_leading3rdJet;
+  //pT ratio
+  //DPS info
+  double gen_DPS_S_CDFpT;
+  double gen_DPS_dS_CDFpT;
+  double gen_DPS_pT_GJ1;
+  double gen_DPS_pT_J2J3;
+  double gen_DPS_imbal_GJ1;
+  double gen_DPS_imbal_J2J3;
+  double gen_DPS_imbal_overall;
+  double gen_DPS_dPhi_GJ1;
+  double gen_DPS_dPhi_GJ2;
+  double gen_DPS_dPhi_GJ3;
+  double gen_DPS_dPhi_J1J2;
+  double gen_DPS_dPhi_J1J3;
+  double gen_DPS_dPhi_J2J3;
+  double gen_DPS_MaxEta_jet;
+  double gen_DPS_MinPt_jet;
+  double gen_Et_ratio_J1G;
+  double gen_Et_ratio_J3J2;
+  //momentum fraction x (Bjorken-x dependence)
+  double gen_DPS_x1_GJ;
+  double gen_DPS_x1_JJ;
+  double gen_DPS_x2_GJ;
+  double gen_DPS_x2_JJ;
+
+  // RECO Level //
+  //info of event 
+  int eventNum;
+  int lumiBlock;
+  int runNumber;
+  int bx;
+  double intrisic_weight; 
+  float n_interactions;
+  float ave_nvtx;
+  float pile_up_weight;
+  double trkPt_squareSum_2ndVtx;
+  int n_vertex;
+  int n_jet_pt20;
+  int n_jet_pt75;
+  int is_DPS_event;
+  //photon info
+  double pT_leadingPhoton;
+  double eta_leadingPhoton;
+  double phi_leadingPhoton;
+  double leadingPhoton_SigmaIetaIeta;
+  double leadingPhoton_SigmaIphiIphi;
+  double leadingPhoton_SigmaIetaIphi;
+  double leadingPhoton_HadronicOverEm;
+  double leadingPhoton_TrackIso;
+  double leadingPhoton_EcalIso;
+  double leadingPhoton_HcalIso;
+  int    leadingPhoton_HasPixelSeed;
+  float  leadingPhoton_SeedTime;
+  //jet info
+  double pT_leading1stJet;
+  double eta_leading1stJet;
+  double phi_leading1stJet;
+  double jecUnc_leading1stJet;
+  double pT_leading2ndJet;
+  double eta_leading2ndJet;
+  double phi_leading2ndJet;
+  double jecUnc_leading2ndJet;
+  double pT_leading3rdJet;
+  double eta_leading3rdJet;
+  double phi_leading3rdJet;
+  double jecUnc_leading3rdJet;
+  double chf_leading1stjet;
+  double nhf_leading1stjet;
+  double cef_leading1stjet;
+  double nef_leading1stjet;
+  double nch_leading1stjet;
+  double nconstituents_leading1stjet;
+  double chf_leading2ndjet;
+  double nhf_leading2ndjet;
+  double cef_leading2ndjet;
+  double nef_leading2ndjet;
+  double nch_leading2ndjet;
+  double nconstituents_leading2ndjet;
+  double chf_leading3rdjet;
+  double nhf_leading3rdjet;
+  double cef_leading3rdjet;
+  double nef_leading3rdjet;
+  double nch_leading3rdjet;
+  double nconstituents_leading3rdjet;
+  //pT ratio
+  //DPS info, RECO LEVEL
+  double DPS_S_CDFpT;    
+  double DPS_dS_CDFpT;
+  double DPS_pT_GJ1;
+  double DPS_pT_J2J3;
+  double DPS_imbal_GJ1;
+  double DPS_imbal_J2J3;
+  double DPS_imbal_overall;
+  double DPS_dPhi_GJ1;
+  double DPS_dPhi_GJ2;
+  double DPS_dPhi_GJ3;
+  double DPS_dPhi_J1J2;
+  double DPS_dPhi_J1J3;
+  double DPS_dPhi_J2J3;
+  double DPS_MaxEta_jet;
+  double DPS_MinPt_jet;
+  double Et_ratio_J1G;
+  double Et_ratio_J3J2;
+
+  //DPS info, GEN LEVEL (counterpart)
+  double DPS_S_CDFpT_genMatch;
+  double DPS_dS_CDFpT_genMatch;
+  double DPS_pT_GJ1_genMatch;
+  double DPS_pT_J2J3_genMatch;
+  double DPS_dPhi_GJ1_genMatch;
+  double DPS_dPhi_GJ2_genMatch;
+  double DPS_dPhi_GJ3_genMatch;
+  double DPS_dPhi_J1J2_genMatch;
+  double DPS_dPhi_J1J3_genMatch;
+  double DPS_dPhi_J2J3_genMatch;
+  double DPS_MaxEta_jet_genMatch;
+  double DPS_MinPt_jet_genMatch;
+  double Et_ratio_J1G_genMatch;
+  double Et_ratio_J3J2_genMatch;
+
+  //DPS info, GEN LEVEL
+  double DPS_S_CDFpT_gen;
+  double DPS_dS_CDFpT_gen;
+  double DPS_imbal_GJ1_gen;
+  double DPS_imbal_J2J3_gen;
+  double DPS_imbal_overall_gen;
+  double DPS_pT_GJ1_gen;
+  double DPS_pT_J2J3_gen;
+  double DPS_dPhi_GJ1_gen;
+  double DPS_dPhi_GJ2_gen;
+  double DPS_dPhi_GJ3_gen;
+  double DPS_dPhi_J1J2_gen;
+  double DPS_dPhi_J1J3_gen;
+  double DPS_dPhi_J2J3_gen;
+  double DPS_MaxEta_jet_gen;
+  double DPS_MinPt_jet_gen;
+  double Et_ratio_J1G_gen;
+  double Et_ratio_J3J2_gen;
+
+  //momentum fraction x (Bjorken-x dependence)
+  double DPS_x1_GJ;
+  double DPS_x1_JJ;
+  double DPS_x2_GJ;
+  double DPS_x2_JJ;
+
+
+  vector<int>  pdgidList;
+
+};
+
+#endif

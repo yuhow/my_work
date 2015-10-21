@@ -1,0 +1,305 @@
+#ifndef AnalysisRootpleProducerOnlyMC_H
+#define AnalysisRootpleProducerOnlyMC_H
+
+#include <memory>
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <math.h>
+
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "JetMETCorrections/Objects/interface/JetCorrector.h"
+#include "JetMETCorrections/Modules/interface/JetCorrectionService.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+
+// jet ID
+#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
+#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
+
+#include <FWCore/Framework/interface/Event.h>
+#include <FWCore/Framework/interface/ESHandle.h>
+#include <FWCore/Framework/interface/MakerMacros.h>
+#include <FWCore/Framework/interface/Frameworkfwd.h>
+#include <FWCore/ParameterSet/interface/ParameterSet.h>
+#include <DataFormats/Common/interface/Handle.h>
+
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+
+#include <FWCore/ServiceRegistry/interface/Service.h>
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
+#include <TROOT.h>
+#include <TTree.h>
+#include <TFile.h>
+#include <TLorentzVector.h>
+#include <TVector.h>
+#include <TObjString.h>
+#include <TClonesArray.h>
+
+#include "DataFormats/JetReco/interface/Jet.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
+#include "DataFormats/JetReco/interface/GenJetCollection.h"
+#include "DataFormats/JetReco/interface/CaloJetCollection.h"
+#include "DataFormats/JetReco/interface/BasicJet.h"
+#include "DataFormats/JetReco/interface/BasicJetCollection.h"
+#include "DataFormats/JetReco/interface/TrackJet.h"
+#include "DataFormats/JetReco/interface/TrackJetCollection.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+//#include "RecoPixelVertexing/PixelVertexFinding/interface/PVClusterComparer.h"
+
+
+// track
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+
+
+
+#include "DataFormats/Candidate/interface/LeafCandidate.h"
+
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
+
+// access trigger results
+#include <FWCore/Common/interface/TriggerNames.h>
+#include <DataFormats/Common/interface/TriggerResults.h>
+#include <DataFormats/HLTReco/interface/TriggerEvent.h> 
+#include <DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h>
+
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+#include <DataFormats/HLTReco/interface/TriggerEvent.h>
+#include <DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h>
+#include "CondFormats/DataRecord/interface/L1GtTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenu.h"
+#include "CondFormats/L1TObjects/interface/L1GtTriggerMenuFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetupFwd.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutSetup.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+
+//handle recHits and clusters: maybe some package are redundant
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/ProjectedSiStripRecHit2D.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
+#include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2DCollection.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DCollection.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+
+// For Photon
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/EgammaReco/interface/PreshowerCluster.h"
+#include "DataFormats/EgammaReco/interface/PreshowerClusterFwd.h"
+
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
+#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgoRcd.h"
+#include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
+#include "CommonTools/Utils/interface/PtComparator.h"
+//#include "RecoEgamma/EgammaTools/interface/ConversionLikelihoodCalculator.h"
+#include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
+#include "DataFormats/HcalDetId/interface/HcalSubdetector.h"
+
+//geometry
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
+
+#include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
+#include "Geometry/EcalAlgo/interface/EcalPreshowerGeometry.h"
+
+//Candidate
+#include "DataFormats/Candidate/interface/Candidate.h"
+
+#include <Math/VectorUtil.h>
+
+
+//PATObject
+#include "DataFormats/PatCandidates/interface/PATObject.h"
+
+#include "PhysicsTools/SelectorUtils/interface/strbitset.h"
+
+
+// pile up summary info.
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
+#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
+
+using namespace edm;
+using namespace reco;
+using namespace trigger;
+using std::vector;
+
+class TTree;
+class TFile;
+class TObject;
+
+
+class AnalysisRootpleProducerOnlyMC : public edm::EDAnalyzer
+{
+
+public:
+  
+  //
+  explicit AnalysisRootpleProducerOnlyMC( const edm::ParameterSet& ) ;
+  virtual ~AnalysisRootpleProducerOnlyMC() {} // no need to delete ROOT stuff
+  // as it'll be deleted upon closing TFile
+
+  virtual void analyze( const edm::Event& e, const edm::EventSetup &es ) ;
+  virtual void beginJob() ;
+  virtual void endJob() ;
+  
+  math::XYZPoint vtx_;
+  typedef math::XYZPoint Point;
+
+  //Point vtx_ ;
+
+  void fillEventInfo(int);
+  void store();
+
+
+protected:
+
+  virtual Float_t getGenCalIso(edm::Handle<reco::GenParticleCollection> handle,
+			        std::vector<GenParticle>::const_iterator thisPho, const Float_t dRMax=0.4, bool removeMu=true, bool removeNu=false);
+
+private:
+  
+  bool onlyRECO;
+
+  InputTag genJetCollName; // label of Jet made with MC particles
+
+  InputTag genPartCollName ;  //for photon+jet analysis
+
+  Handle< GenParticleCollection > CandHandleMCGamma  ;
+  Handle< GenJetCollection    > GenJetsHandle ;
+
+  //edm::Service<TFileService> fs;
+
+  float piG;
+
+  //Event_selection
+  //Photon_property
+  TH1D* h_pT_leadingPhoton_B;
+  TH1D* h_pT_leadingPhoton_E;
+  TH1D* h_eta_leadingPhoton_B;
+  TH1D* h_eta_leadingPhoton_E;
+  TH1D* h_phi_leadingPhoton_B;
+  TH1D* h_phi_leadingPhoton_E;
+  //jet_property
+  TH1D* h_multiplicity_jet;
+
+  TH1D* h_pT_leading1stjet;
+  TH1D* h_eta_leading1stjet;
+  TH1D* h_phi_leading1stjet;
+  TH1D* h_pT_leading2ndjet;
+  TH1D* h_eta_leading2ndjet;
+  TH1D* h_phi_leading2ndjet;
+  TH1D* h_pT_leading3rdjet;
+  TH1D* h_eta_leading3rdjet;
+  TH1D* h_phi_leading3rdjet;
+  //validation
+  TH1D* h_selection_eff;
+  //DPS_analysis
+  TH1D* h_dPhiGamma1stJet;
+  TH1D* h_dPhiGamma2ndJet;
+  TH1D* h_dPhiGamma3rdJet;
+  TH1D* h_dPhi1stJet2ndJet;
+  TH1D* h_dPhi1stJet3rdJet;
+  TH1D* h_dPhi2ndJet3rdJet;
+  TH1D* h_MaxEta_Jet;
+  TH1D* h_MinPt_Jet;
+  TH1D* h_pT_G_Jet1;
+  TH1D* h_pT_Jet2_Jet3;
+  TH1D* h_pT_imbalance_G_Jet1;
+  TH1D* h_pT_imbalance_Jet2_Jet3;
+  TH1D* h_pT_imbalance_overall;
+  TH1D* h_ratio_EtJ1_EtG;
+  TH1D* h_ratio_EtJ3_EtJ2;
+  TH1D* h_S_CDFpt;
+  TH1D* h_dS_CDFpt;
+
+  TTree* GEN_AnalysisTree;
+
+  //info of event
+  double gen_intrisic_weight_RAW;
+  int    gen_selection_number_RAW;
+  double gen_pT_leadingPhoton_RAW;
+
+  TTree* GEN_DPS_AnalysisTree;
+
+  //info of event
+  double gen_intrisic_weight;
+  int    gen_n_jet_pt20;
+  int    gen_n_jet_pt75;
+  int    gen_is_DPS_event;
+  //photon info
+  int    genMomId;
+  double genIsoDR04;
+  double gen_pT_leadingPhoton;
+  double gen_eta_leadingPhoton;
+  double gen_phi_leadingPhoton;
+  //jet info
+  double gen_pT_leading1stJet;
+  double gen_eta_leading1stJet;
+  double gen_phi_leading1stJet;
+  double gen_pT_leading2ndJet;
+  double gen_eta_leading2ndJet;
+  double gen_phi_leading2ndJet;
+  double gen_pT_leading3rdJet;
+  double gen_eta_leading3rdJet;
+  double gen_phi_leading3rdJet;
+  //pT ratio  
+  //DPS info
+  double gen_DPS_S_CDFpT;
+  double gen_DPS_dS_CDFpT;
+  double gen_DPS_pT_GJ1;
+  double gen_DPS_pT_J2J3;
+  double gen_DPS_imbal_GJ1;
+  double gen_DPS_imbal_J2J3;
+  double gen_DPS_imbal_overall;
+  double gen_DPS_dPhi_GJ1;
+  double gen_DPS_dPhi_GJ2;
+  double gen_DPS_dPhi_GJ3;
+  double gen_DPS_dPhi_J1J2;
+  double gen_DPS_dPhi_J1J3;
+  double gen_DPS_dPhi_J2J3;
+  double gen_DPS_MaxEta_jet;
+  double gen_DPS_MinPt_jet;
+  double gen_Et_ratio_J1G;
+  double gen_Et_ratio_J3J2;
+  //momentum fraction x (Bjorken-x dependence)
+  double gen_DPS_x1_GJ;
+  double gen_DPS_x1_JJ;
+  double gen_DPS_x2_GJ;
+  double gen_DPS_x2_JJ;
+
+  vector<int>  pdgidList;
+
+};
+
+#endif

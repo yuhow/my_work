@@ -1,0 +1,9 @@
+//Analysis code User guide
+
+
+AnalysisRootpleProducer.cc_20130612_normal_backup       -> For normal DPS study
+AnalysisRootpleProducer.cc_20130615_JER_study	 	-> For jet energy resolution study
+AnalysisRootpleProducer.cc_20130615_inclusiveSelection  -> inclusive selection (jets production in association with high pT photons
+AnalysisRootpleProducerOnlyMC.cc			-> For Gen. level study
+
+
