@@ -69,8 +69,8 @@ def main():
     # arguments
     parser = argparse.ArgumentParser()
 
-    # type of process: AFK (there will be mush more in the future...)
-    parser.add_argument('-p', '--process',  type=str, help="Type of PROCESS, which currently can be 'AFK'. The default is 'AFK'.")
+    # type of process: A, B, C...
+    #parser.add_argument('-p', '--process',  type=str, help="Type of PROCESS, which currently can be 'A', 'B', 'C'. The default is 'A'.")
 
     # sub-setting
     #parser.add_argument('-c',   '--cfg',     type=str, help="CFG is your job configuration file. The default is 'job_setting.cfg'.")
@@ -86,12 +86,12 @@ def main():
     app.setStyle("cleanlooks")
 
     img_splash = QPixmap("[PROJECT_ROOT_DIR]/icon/PTT_splash.png")
-    splash_AFK = QSplashScreen(img_splash)
-    #splash_AFK.setWindowFlags(splash_AFK.windowFlags() | Qt.WindowStaysOnTopHint)
-    splash_AFK.setMask(img_splash.mask())
+    splash_PTT = QSplashScreen(img_splash)
+    #splash_PTT.setWindowFlags(splash_PTT.windowFlags() | Qt.WindowStaysOnTopHint)
+    splash_PTT.setMask(img_splash.mask())
 
     if not args.no_preface:
-        splash_AFK.show()
+        splash_PTT.show()
         time.sleep(3)  # this can be modified in the future
 
     ps_window = QDialog()
@@ -155,7 +155,7 @@ def main():
     main = MainWindow()
     main.show()
 
-    splash_AFK.finish(main)
+    splash_PTT.finish(main)
     
     sys.exit(app.exec_())
 
