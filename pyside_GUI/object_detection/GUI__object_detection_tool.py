@@ -80,7 +80,8 @@ class AnnotationWidget(QWidget):
     def __init__(self, parent = None):
         super(AnnotationWidget, self).__init__(parent = parent)
         self.parent = parent
-
+        
+        self.imagePath = ""
         self.onlyInt = QIntValidator()
 
         annotationAreaLayout = QVBoxLayout()
@@ -178,8 +179,6 @@ class AnnotationWidget(QWidget):
         """
         loading image -> *.jpg
         """
-        self.imagePath = ""
-
         FD = QFileDialog(self,"Load Image File...",directory="./")
         FD.setAcceptMode(QFileDialog.AcceptOpen)
         FD.setFileMode(QFileDialog.ExistingFile)
@@ -385,7 +384,7 @@ class ObjectDetectionWidget(QWidget):
         topPipeData = QVBoxLayout()
 
         self.pipeGen = QLabel()
-        pipe_gen_pixmap = QPixmap("icon/pipe_gen_small.png")
+        pipe_gen_pixmap = QPixmap("icon/pipe_gen.png")
         self.pipeGen.setPixmap(pipe_gen_pixmap)
         self.pipeGen.setFixedHeight(120)
         self.pipeGen.setFixedWidth(20)
@@ -394,7 +393,7 @@ class ObjectDetectionWidget(QWidget):
         topGenData = QVBoxLayout()
 
         self.runGenFree = QPushButton("")
-        self.runGenFree.setIcon(QPixmap("icon/Button-Play-icon_small.png"))
+        self.runGenFree.setIcon(QPixmap("icon/Button-Play-icon.png"))
         self.runGenFree.setToolTip("Click to start producing your training record/sample.")
         self.runGenFree.clicked.connect(self.start_tf_sample_production)
         self.runGenFree.setFixedHeight(30)
@@ -402,7 +401,7 @@ class ObjectDetectionWidget(QWidget):
         topGenData.addWidget(self.runGenFree)
 
         self.runGenBusy = QPushButton("")
-        self.runGenBusy.setIcon(QPixmap("icon/Actions-process-stop-icon_small.png"))
+        self.runGenBusy.setIcon(QPixmap("icon/Actions-process-stop-icon.png"))
         self.runGenBusy.setToolTip("Click to stop producing your training record/sample.")
         self.runGenBusy.clicked.connect(self.stop_tf_sample_production)
         self.runGenBusy.setFixedHeight(30)
@@ -411,7 +410,7 @@ class ObjectDetectionWidget(QWidget):
         self.runGenBusy.setVisible(False)
 
         self.runGenFreeFrame = QLabel()
-        runGenFreePicture = QPixmap("icon/factory_off_small.png")
+        runGenFreePicture = QPixmap("icon/factory_free.png")
         self.runGenFreeFrame.setPixmap(runGenFreePicture)
         topGenData.addWidget(self.runGenFreeFrame)
 
@@ -420,7 +419,7 @@ class ObjectDetectionWidget(QWidget):
         self.runGenBusyFrame.setAlignment(Qt.AlignCenter)
         topGenData.addWidget(self.runGenBusyFrame)
         self.runGenBusyFrame.setVisible(False)
-        runGenBusyGif = "icon/factory_on_animation_small.gif"
+        runGenBusyGif = "icon/factory_busy_animation.gif"
         self.runGenBusyMovie = QMovie(runGenBusyGif, QByteArray(), self) 
         self.runGenBusyMovie.setCacheMode(QMovie.CacheAll) 
         self.runGenBusyMovie.setSpeed(100) 
@@ -429,7 +428,7 @@ class ObjectDetectionWidget(QWidget):
         self.runGenBusyMovie.stop()
 
         #self.runGenBusy = QPushButton("")
-        #self.runGenBusy.setIcon(QPixmap("icon/factory_on_small.png"))
+        #self.runGenBusy.setIcon(QPixmap("icon/factory_busy.png"))
         #self.runGenBusy.setIconSize(QSize(90, 90))
         #self.runGenBusy.setFixedHeight(100)
         #self.runGenBusy.setFixedWidth(100)
@@ -539,7 +538,7 @@ class ObjectDetectionWidget(QWidget):
         trainingPipeData = QVBoxLayout()
 
         self.trainingPipe = QLabel()
-        training_pipe_pixmap = QPixmap("icon/pipe_gen_v2_small.png")
+        training_pipe_pixmap = QPixmap("icon/pipe_gen_v2.png")
         self.trainingPipe.setPixmap(training_pipe_pixmap)
         self.trainingPipe.setFixedHeight(150)
         self.trainingPipe.setFixedWidth(20)
@@ -548,7 +547,7 @@ class ObjectDetectionWidget(QWidget):
         startTraining = QVBoxLayout()
 
         self.modelTrainingFree = QPushButton("")
-        self.modelTrainingFree.setIcon(QPixmap("icon/Button-Play-icon_small.png"))
+        self.modelTrainingFree.setIcon(QPixmap("icon/Button-Play-icon.png"))
         self.modelTrainingFree.setToolTip("Click to start training your model.")
         self.modelTrainingFree.clicked.connect(self.start_model_training)
         self.modelTrainingFree.setFixedHeight(30)
@@ -556,7 +555,7 @@ class ObjectDetectionWidget(QWidget):
         startTraining.addWidget(self.modelTrainingFree)
 
         self.modelTrainingBusy = QPushButton("")
-        self.modelTrainingBusy.setIcon(QPixmap("icon/Actions-process-stop-icon_small.png"))
+        self.modelTrainingBusy.setIcon(QPixmap("icon/Actions-process-stop-icon.png"))
         self.modelTrainingBusy.setToolTip("Click to stop training your model.")
         self.modelTrainingBusy.clicked.connect(self.stop_model_training)
         self.modelTrainingBusy.setFixedHeight(30)
@@ -565,7 +564,7 @@ class ObjectDetectionWidget(QWidget):
         self.modelTrainingBusy.setVisible(False)
 
         self.modelTrainingFreeFrame = QLabel()
-        modelTrainingFreePicture = QPixmap("icon/spongebob_model_small.png")
+        modelTrainingFreePicture = QPixmap("icon/spongebob_model.png")
         self.modelTrainingFreeFrame.setPixmap(modelTrainingFreePicture)
         startTraining.addWidget(self.modelTrainingFreeFrame)
 
@@ -574,7 +573,7 @@ class ObjectDetectionWidget(QWidget):
         self.modelTrainingBusyFrame.setAlignment(Qt.AlignCenter)
         startTraining.addWidget(self.modelTrainingBusyFrame)
         self.modelTrainingBusyFrame.setVisible(False)
-        modelTrainingBusyGif = "icon/spongebob_work_small.gif"
+        modelTrainingBusyGif = "icon/spongebob_work.gif"
         self.modelTrainingBusyMovie = QMovie(modelTrainingBusyGif, QByteArray(), self) 
         self.modelTrainingBusyMovie.setCacheMode(QMovie.CacheAll) 
         self.modelTrainingBusyMovie.setSpeed(100) 
@@ -607,4 +606,401 @@ class ObjectDetectionWidget(QWidget):
 
     #=====================================================#
     #=====================================================#
+    
+    def load_annotation(self):
+        """
+        loading annotation file
+        """
+        FD = QFileDialog(self,"Load Text File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["TXT file (*.txt)"])
+        if FD.exec_():
+            self.annotationPath.setText(str(FD.selectedFiles()[0]))
+
+    def load_label_map_for_sampling(self):
+        """
+        loading label map file for sampling
+        """
+        FD = QFileDialog(self,"Load pb-Text File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["PBTXT file (*.pbtxt)"])
+        if FD.exec_():
+            self.mapTextForGen.setText(str(FD.selectedFiles()[0]))
+
+    def load_image_directory(self):
+        """
+        loading image directory
+        """
+        FD = QFileDialog(self,"Load Directory...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.Directory)
+        FD.setOption(QFileDialog.ShowDirsOnly)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        if FD.exec_():
+            self.imagePath.setText(str(FD.selectedFiles()[0]))
+
+    def start_tf_sample_production(self):
+        """
+        starting Tensorflow sample generator
+        """
+        #check setting
+        if not os.path.isfile(self.annotationPath.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your annotation file is not valid or doesn't exist.")
+            msgBox.exec_()
+            self.annotationPath.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.annotationPath.setStyleSheet("")
+
+        if not os.path.isfile(self.mapTextForGen.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your label map file is not valid or doesn't exist.")
+            msgBox.exec_()
+            self.mapTextForGen.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.mapTextForGen.setStyleSheet("")
+
+        if not os.path.isdir(self.imagePath.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your input image directory is not valid or doesn't exist.")
+            msgBox.exec_()
+            self.imagePath.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.imagePath.setStyleSheet("")
+
+        self.jobMsg.runMessage.clear()
+        self.jobMsg.errorMessage.clear()
+        self.widget_control('sampling')
+
+        self.jobMsg.APM.Popen("python2.7 /volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/TFRecord_generator.pyc "\
+                              +self.annotationPath.text()+" "+self.mapTextForGen.text()+" "+self.imagePath.text(), \
+                              shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    def stop_tf_sample_production(self):
+        """
+        stopping Tensorflow sample generator
+        """
+        exit_msg = os.system('/ban/yohchang/Release/toolkit_for_deep_learning/kill_jobs.csh TFRecord_generator.pyc')
+        time.sleep(5)
+        if exit_msg:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Information)
+            msgBox.setText('All sample-production jobs are killed.')
+            msgBox.exec_()
+        else:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Information)
+            msgBox.setText('There is no any sample-production job.')
+            msgBox.exec_()
+
+        # widget control
+        self.widget_control("idle")
+
+    def load_label_map_for_modeling(self):
+        """
+        loading label map file for modeling
+        """
+        FD = QFileDialog(self,"Load pb-Text File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["PBTXT file (*.pbtxt)"])
+        if FD.exec_():
+            self.mapTextForMod.setText(str(FD.selectedFiles()[0]))
+
+    def load_pretrained_model(self):
+        """
+        loading pretrained model (fintune checkpoint)
+        """
+        FD = QFileDialog(self,"Load Model File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["CKPT file (*.ckpt*.data*)"])
+        if FD.exec_():
+            list_pretrained_text = str(FD.selectedFiles()[0]).strip().split('/')
+            self.pretrainedModel.setText('/'.join(x for x in list_pretrained_text[:-1])+'/'+\
+                                         list_pretrained_text[-1].split('.')[0]+'.'+\
+                                         list_pretrained_text[-1].split('.')[1])
+
+    def load_training_data(self):
+        """
+        loading training data set
+        """
+        FD = QFileDialog(self,"Load Data/Record File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["record file (*.record)"])
+        if FD.exec_():
+            self.trainingData.setText(str(FD.selectedFiles()[0]))
+
+    def start_model_training(self):
+        """
+        starting model training
+        """
+        #check setting
+        try:
+            if not float(self.minImageDimText.text()).is_integer():
+                msgBox = QMessageBox()
+                msgBox.setIcon(msgBox.Critical)
+                msgBox.setText("Error: You must assign an integer number to 'Min. pixel' of your input image(s).")
+                msgBox.exec_()
+                self.minImageDimText.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+                return
+            else:
+                self.minImageDimText.setStyleSheet("")
+        except:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: You must assign an integer number to 'Min. pixel' of your input image(s).")
+            msgBox.exec_()
+            self.minImageDimText.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+            
+        try:
+            if not float(self.maxImageDimText.text()).is_integer():
+                msgBox = QMessageBox()
+                msgBox.setIcon(msgBox.Critical)
+                msgBox.setText("Error: You must assign an integer number to 'Max. pixel' of your input image(s).")
+                msgBox.exec_()
+                self.maxImageDimText.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+                return
+            else:
+                self.maxImageDimText.setStyleSheet("")
+        except:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: You must assign an integer number to 'Max. pixel' of your input image(s).")
+            msgBox.exec_()
+            self.maxImageDimText.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+
+        if not os.path.isfile(self.mapTextForMod.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your label map file is not valid or doesn't exist.")
+            msgBox.exec_()
+            self.mapTextForMod.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.mapTextForMod.setStyleSheet("")
+
+        if not os.path.isfile(self.pretrainedModel.text()+'.data-00000-of-00001') or\
+           not os.path.isfile(self.pretrainedModel.text()+'.index') or\
+           not os.path.isfile(self.pretrainedModel.text()+'.meta'):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your pretrained model is not valid or doesn't exist.\n"+\
+                           "           The input text must end in 'model.ckpt' or 'model.ckpt-[DIGITS]'\n"+\
+                           "           There are three files: *.ckpt.data-00000-of-00001, *.ckpt.index\n"+\
+                           "           and *.ckpt.meta.")
+            msgBox.exec_()
+            self.pretrainedModel.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.pretrainedModel.setStyleSheet("")
+
+        if not os.path.isfile(self.trainingData.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your input traing sample is not valid or doesn't exist.")
+            msgBox.exec_()
+            self.trainingData.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.trainingData.setStyleSheet("")
+
+        if self.outputModelPath.text().strip() == "":
+            self.outputModelPath.setText("train_"+time.strftime("%Y%m%d%H%M%S", time.localtime()))
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Warning)
+            msgBox.setText("Warning: Since you don't assign an directory path of output. The system \n"+\
+                           "              automatically create an output directory '"+self.outputModelPath.text()+"'\n"+\
+                           "              under your current working directory.")
+            msgBox.exec_()
+            os.system('mkdir '+self.outputModelPath.text())
+        elif not os.path.isdir(self.outputModelPath.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Warning)
+            msgBox.setText("Warning: The output directory you assign is not valid or doesn't exist.\n"+\
+                           "                 It will be automatically created by system.")
+            msgBox.exec_()
+            os.system('mkdir '+self.outputModelPath.text())
+        else:
+            if os.listdir(self.outputModelPath.text()) != []:
+                msgBox = QMessageBox()
+                msgBox.setIcon(msgBox.Warning)
+                msgBox.setText("Warning: The output directory you assign is not empty. Please make\n"+\
+                               "                 sure everything in it is unnecessary. You can backup\n"+\
+                               "                 it/them before you click 'OK'. If it contains some models,\n"+\
+                               "                 the training process will restore parameters from the last\n"+\
+                               "                 model in that directory.\n"+\
+                               "                 Model training will directly start after you click 'OK'.")
+                msgBox.exec_()    
+
+        self.jobMsg.runMessage.clear()
+        self.jobMsg.errorMessage.clear()
+        self.widget_control('modeling')
+        self.check_num_of_classes_modeling()
+        self.produce_model_config()
+
+        # python2.7 -i, where the option '-i' is necessary. 
+        # then we can have normal standard output message and error message
+        self.jobMsg.APM.Popen("python2.7 -i /volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/train.pyc "+\
+                              "--logtostdout "+\
+                              "--pipeline_config_path="+self.outputModelPath.text()+"/faster_resnet_101.config "+\
+                              "--train_dir="+self.outputModelPath.text()\
+                              , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    def produce_model_config(self):
+        """
+        producing the configure file of model
+        """
+        file_template = open('/volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/faster_resnet_101_template.config', 'r')
+        file_output   = open(self.outputModelPath.text()+'/faster_resnet_101.config', 'w')
+
+        for line in file_template.readlines():
+            if '[NUM_CLASSES]' in line.strip():
+                file_output.write('    num_classes: '+str(self.num_classes)+'\n')
+            elif '[MIN_DIMENSION]' in line.strip():
+                file_output.write('        min_dimension: '+self.minImageDimText.text()+'\n')
+            elif '[MAX_DIMENSION]' in line.strip():
+                file_output.write('        max_dimension: '+self.maxImageDimText.text()+'\n')
+            elif '[FINE_TUNE_CHECKPOINT]' in line.strip():
+                file_output.write('  fine_tune_checkpoint: "'+self.pretrainedModel.text()+'"\n')
+            elif '[TRAIN_INPUT_PATH]' in line.strip():
+                file_output.write('    input_path: "'+self.trainingData.text()+'"\n')
+            elif '[EVAL_INPUT_PATH]' in line.strip():
+                file_output.write('    input_path: "/volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/val.record"\n')
+            elif '[LABEL_MAP_PATH]' in line.strip():
+                file_output.write('  label_map_path: "'+self.mapTextForMod.text()+'"\n')
+            else:
+                file_output.write(line)
+
+        file_template.close()
+        file_output.close()
+
+        msgBox = QMessageBox()
+        msgBox.setIcon(msgBox.Information)
+        msgBox.setText("A config file 'faster_resnet_101.config' is automatically \n"+
+                       "created under directory '"+self.outputModelPath.text()+"'.\n"+
+                       "Please don't delete it. You still need it for exporting your\n"+
+                       "final model for inference.")
+        msgBox.exec_()
+
+    def check_num_of_classes_modeling(self):
+        """
+        checking the number of classes listed in label map for modeling
+        """
+        file_map = open(self.mapTextForMod.text(), 'r')
+
+        self.num_classes = 0
+        for line in file_map.readlines():
+            if 'item' in line.strip() and 'name' not in line.strip():
+                self.num_classes += 1
+
+    def stop_model_training(self):
+        """
+        stopping model training
+        """
+        exit_msg = os.system('/ban/yohchang/Release/toolkit_for_deep_learning/kill_jobs.csh train.pyc '+self.outputModelPath.text())
+        time.sleep(5)
+        if exit_msg:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Information)
+            msgBox.setText('Your model-training job is stopped.')
+            msgBox.exec_()
+        else:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Information)
+            msgBox.setText('There is no any model-training job.')
+            msgBox.exec_()
+
+        # widget control
+        self.widget_control("idle")
+
+    def widget_control(self, current_job):
+        """
+        controling widgets among different jobs
+        """
+        if current_job == 'sampling':
+            self.loadAnnotation.setEnabled(False)
+            self.annotationPath.setEnabled(False)
+            self.loadMapForGen.setEnabled(False)
+            self.mapTextForGen.setEnabled(False)
+            self.loadImage.setEnabled(False)
+            self.imagePath.setEnabled(False)
+            self.runGenFree.setVisible(False)
+            self.runGenBusy.setVisible(True)
+            self.runGenFreeFrame.setVisible(False)
+            self.runGenBusyFrame.setVisible(True)
+            self.runGenBusyMovie.start()
+            self.modelTrainingFree.setEnabled(False)
+            self.modelTrainingBusy.setEnabled(False)
+            self.modelTrainingFreeFrame.setEnabled(False)
+            self.modelTrainingBusyFrame.setEnabled(False)
+        elif current_job == 'modeling':
+            self.runGenFree.setEnabled(False)
+            self.runGenBusy.setEnabled(False)
+            self.runGenFreeFrame.setEnabled(False)
+            self.runGenBusyFrame.setEnabled(False)
+            self.minImageDimText.setEnabled(False)
+            self.maxImageDimText.setEnabled(False)
+            self.mapTextForMod.setEnabled(False)
+            self.loadMapForMod.setEnabled(False)
+            self.pretrainedModel.setEnabled(False)
+            self.loadPretrainedModel.setEnabled(False)
+            self.trainingData.setEnabled(False)
+            self.loadTrainingData.setEnabled(False)
+            self.outputModelPath.setEnabled(False)
+            self.modelTrainingFree.setVisible(False)
+            self.modelTrainingBusy.setVisible(True)
+            self.modelTrainingFreeFrame.setVisible(False)
+            self.modelTrainingBusyFrame.setVisible(True)
+            self.modelTrainingBusyMovie.start()
+        elif current_job == 'idle':
+            self.loadAnnotation.setEnabled(True)
+            self.annotationPath.setEnabled(True)
+            self.loadMapForGen.setEnabled(True)
+            self.mapTextForGen.setEnabled(True)
+            self.loadImage.setEnabled(True)
+            self.imagePath.setEnabled(True)
+            self.runGenFree.setEnabled(True)
+            self.runGenBusy.setEnabled(True)
+            self.runGenFreeFrame.setEnabled(True)
+            self.runGenBusyFrame.setEnabled(True)
+            self.runGenFree.setVisible(True)
+            self.runGenBusy.setVisible(False)
+            self.runGenFreeFrame.setVisible(True)
+            self.runGenBusyFrame.setVisible(False)
+            self.runGenBusyMovie.stop()
+            self.minImageDimText.setEnabled(True)
+            self.maxImageDimText.setEnabled(True)
+            self.mapTextForMod.setEnabled(True)
+            self.loadMapForMod.setEnabled(True)
+            self.pretrainedModel.setEnabled(True)
+            self.loadPretrainedModel.setEnabled(True)
+            self.trainingData.setEnabled(True)
+            self.loadTrainingData.setEnabled(True)
+            self.outputModelPath.setEnabled(True)
+            self.modelTrainingFree.setEnabled(True)
+            self.modelTrainingBusy.setEnabled(True)
+            self.modelTrainingFreeFrame.setEnabled(True)
+            self.modelTrainingBusyFrame.setEnabled(True)
+            self.modelTrainingFree.setVisible(True)
+            self.modelTrainingBusy.setVisible(False)
+            self.modelTrainingFreeFrame.setVisible(True)
+            self.modelTrainingBusyFrame.setVisible(False)
+            self.modelTrainingBusyMovie.stop()
 
