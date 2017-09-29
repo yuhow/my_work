@@ -1004,3 +1004,557 @@ class ObjectDetectionWidget(QWidget):
             self.modelTrainingBusyFrame.setVisible(False)
             self.modelTrainingBusyMovie.stop()
 
+
+#=============================================================#
+#------------------  ModelPredictionWidget  ------------------#
+#=============================================================#
+class ModelPredictionWidget(QWidget):
+    def __init__(self, parent = None):
+        super(ModelPredictionWidget, self).__init__(parent = parent)
+        self.parent = parent
+
+        self.num_classes = 0
+
+        modelPredictionAreaLayout = QVBoxLayout()
+
+        modelPredictionMainLayout = QVBoxLayout()
+        modelPredictionMainLayout.setAlignment(Qt.AlignCenter)
+        modelPredictionMainLayout.setContentsMargins(5,5,5,5)
+
+        modelPrediction_widget = QWidget()
+        modelPrediction_widget.setLayout(modelPredictionMainLayout)
+
+        self.exportGraph = QGroupBox("Export inference graph")
+        self.predicting = QGroupBox("Object-detection model predicting")
+
+        self.scrollAreaSetup = QScrollArea()
+        self.scrollAreaSetup.setWidget(modelPrediction_widget)
+        self.scrollAreaSetup.setWidgetResizable(True)
+
+        #---- exporting graph ----#
+        export_layout = QHBoxLayout()
+
+        topDataExport = QGridLayout()
+
+        self.modelPathLabel = QLabel("model path")
+        self.modelPathLabel.setFixedWidth(80)
+        topDataExport.addWidget(self.modelPathLabel, 0, 0)
+        self.modelPath = QLineEdit()
+        self.modelPath.setAlignment(Qt.AlignLeft)
+        self.modelPath.setText("")
+        self.modelPath.setFixedWidth(400)
+        self.modelPath.setToolTip("A trained model which will be exported for inference.")
+        topDataExport.addWidget(self.modelPath, 0, 1)
+        self.loadModel = QPushButton("load model")
+        self.loadModel.clicked.connect(self.load_trained_model)
+        self.loadModel.setFixedWidth(100)
+        topDataExport.addWidget(self.loadModel, 0, 2)
+
+        self.modelConfigPathLabel = QLabel("config path")
+        self.modelConfigPathLabel.setFixedWidth(80)
+        topDataExport.addWidget(self.modelConfigPathLabel, 1, 0)
+        self.modelConfigPath = QLineEdit()
+        self.modelConfigPath.setAlignment(Qt.AlignLeft)
+        self.modelConfigPath.setText("")
+        self.modelConfigPath.setFixedWidth(400)
+        self.modelConfigPath.setToolTip("Load the config file of your trained model.\n"+\
+                                        "It exists usually in the directory of training output.")
+        topDataExport.addWidget(self.modelConfigPath, 1, 1)
+        self.loadModelConfig = QPushButton("load config")
+        self.loadModelConfig.clicked.connect(self.load_model_config)
+        self.loadModelConfig.setFixedWidth(100)
+        topDataExport.addWidget(self.loadModelConfig, 1, 2)
+
+        self.inferenceGraphPathLabel = QLabel("graph path")
+        self.inferenceGraphPathLabel.setFixedWidth(80)
+        topDataExport.addWidget(self.inferenceGraphPathLabel, 2, 0)
+        self.inferenceGraphPath = QLineEdit()
+        self.inferenceGraphPath.setAlignment(Qt.AlignLeft)
+        self.inferenceGraphPath.setText("[YOUR_OUTPUT_INFERENCE_GRAPH].pb")
+        self.inferenceGraphPath.setPlaceholderText("[YOUR_OUTPUT_INFERENCE_GRAPH].pb")
+        self.inferenceGraphPath.setFixedWidth(400)
+        self.inferenceGraphPath.setToolTip("Give a name for your output inference graph.")
+        topDataExport.addWidget(self.inferenceGraphPath, 2, 1)
+
+        topPipeExport = QVBoxLayout()
+
+        self.pipeExport = QLabel()
+        pipe_gen_pixmap = QPixmap("[PATH_TO_BE_MODIFIED]/icon/pipe_gen.png")
+        self.pipeExport.setPixmap(pipe_gen_pixmap)
+        self.pipeExport.setFixedHeight(120)
+        self.pipeExport.setFixedWidth(20)
+        topPipeExport.addWidget(self.pipeExport)
+
+        topExport = QVBoxLayout()
+
+        self.runExportFree = QPushButton("")
+        self.runExportFree.setIcon(QPixmap("[PATH_TO_BE_MODIFIED]/icon/Button-Play-icon.png"))
+        self.runExportFree.setToolTip("Click to start producing your training record/sample.")
+        self.runExportFree.clicked.connect(self.start_export_inference_graph)
+        self.runExportFree.setFixedHeight(30)
+        self.runExportFree.setFixedWidth(100)
+        topExport.addWidget(self.runExportFree)
+
+        self.runExportBusy = QPushButton("")
+        self.runExportBusy.setIcon(QPixmap("[PATH_TO_BE_MODIFIED]/icon/Actions-process-stop-icon.png"))
+        self.runExportBusy.setToolTip("Click to stop producing your training record/sample.")
+        self.runExportBusy.clicked.connect(self.stop_export_inference_graph)
+        self.runExportBusy.setFixedHeight(30)
+        self.runExportBusy.setFixedWidth(100)
+        topExport.addWidget(self.runExportBusy)
+        self.runExportBusy.setVisible(False)
+
+        self.runExportFreeFrame = QLabel()
+        runExportFreePicture = QPixmap("[PATH_TO_BE_MODIFIED]/icon/spongebob_export.png")
+        self.runExportFreeFrame.setPixmap(runExportFreePicture)
+        topExport.addWidget(self.runExportFreeFrame)
+
+        self.runExportBusyFrame = QLabel()
+        self.runExportBusyFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.runExportBusyFrame.setAlignment(Qt.AlignCenter)
+        topExport.addWidget(self.runExportBusyFrame)
+        self.runExportBusyFrame.setVisible(False)
+        runExportBusyGif = "[PATH_TO_BE_MODIFIED]/icon/export.gif"
+        self.runExportBusyMovie = QMovie(runExportBusyGif, QByteArray(), self) 
+        self.runExportBusyMovie.setCacheMode(QMovie.CacheAll) 
+        self.runExportBusyMovie.setSpeed(100) 
+        self.runExportBusyFrame.setMovie(self.runExportBusyMovie) 
+        self.runExportBusyMovie.start()
+        self.runExportBusyMovie.stop()
+
+        export_layout.addLayout(topDataExport)
+        export_layout.addLayout(topPipeExport)
+        export_layout.addLayout(topExport)
+
+        self.exportGraph.setLayout(export_layout)
+
+        #---- model predicting ----#
+        predicting_layout = QHBoxLayout()
+
+        predicting_sublayout = QVBoxLayout()
+        predicting_sublayout.setAlignment(Qt.AlignLeft)
+
+        predicting_sublayout_top = QGridLayout()
+        predicting_sublayout_bottom = QGridLayout()
+
+        self.isShowingImageChecked = QCheckBox("display image")
+        self.isShowingImageChecked.setCheckState(Qt.Unchecked)
+        self.isShowingImageChecked.setToolTip("check this option if you want to display image(s) simultaneously, default is 'OFF'\n"+
+                                              "It should be noted that image result is shown one after one. We recommended you to\n"+
+                                              "check this option when you have few images and really need to check your result(s)\n"+
+                                              "instantaneously. Without checking this option, all results will still be saved under\n"+
+                                              "your current working directory.")
+        predicting_sublayout_top.addWidget(self.isShowingImageChecked, 0, 0)
+
+        self.isGrayScaleChecked = QCheckBox("gray scale")
+        self.isGrayScaleChecked.setCheckState(Qt.Checked)
+        self.isGrayScaleChecked.setToolTip("Check this option if your image(s) is/are in gray scale, default is 'ON'")
+        predicting_sublayout_top.addWidget(self.isGrayScaleChecked, 1, 0)
+
+        self.inferenceGraphLabel = QLabel("TF graph")
+        self.inferenceGraphLabel.setFixedWidth(80)
+        predicting_sublayout_bottom.addWidget(self.inferenceGraphLabel, 0, 0)
+        self.inferenceGraph = QLineEdit()
+        self.inferenceGraph.setAlignment(Qt.AlignLeft)
+        self.inferenceGraph.setText("")
+        self.inferenceGraph.setFixedWidth(400)
+        self.inferenceGraph.setToolTip("Load an inference graph for object detection.")
+        predicting_sublayout_bottom.addWidget(self.inferenceGraph, 0, 1)
+        self.loadinferenceGraph = QPushButton("load graph")
+        self.loadinferenceGraph.clicked.connect(self.load_inference_graph)
+        self.loadinferenceGraph.setFixedWidth(100)
+        predicting_sublayout_bottom.addWidget(self.loadinferenceGraph, 0, 2)
+
+        self.mapLabelForPred = QLabel("label map")
+        self.mapLabelForPred.setFixedWidth(80)
+        predicting_sublayout_bottom.addWidget(self.mapLabelForPred, 1, 0)
+        self.mapTextForPred = QLineEdit()
+        self.mapTextForPred.setAlignment(Qt.AlignLeft)
+        self.mapTextForPred.setText("")
+        self.mapTextForPred.setFixedWidth(400)
+        self.mapTextForPred.setToolTip("Load a label map for predicting. If should be noted this label map has to\n"+
+                                       "be consistent with the one used for producing training record/sample,\n"+
+                                       "model-training and exporting inference graph.")
+        predicting_sublayout_bottom.addWidget(self.mapTextForPred, 1, 1)
+        self.loadMapForPred = QPushButton("load map")
+        self.loadMapForPred.clicked.connect(self.load_label_map_for_predicting)
+        self.loadMapForPred.setFixedWidth(100)
+        predicting_sublayout_bottom.addWidget(self.loadMapForPred, 1, 2)
+
+        self.predictingDataLabel = QLabel("image list")
+        self.predictingDataLabel.setFixedWidth(80)
+        predicting_sublayout_bottom.addWidget(self.predictingDataLabel, 2, 0)
+        self.predictingData = QLineEdit()
+        self.predictingData.setAlignment(Qt.AlignLeft)
+        self.predictingData.setText("")
+        self.predictingData.setFixedWidth(400)
+        self.predictingData.setToolTip("Load a list of input image data for object detection.\n"+
+                                       "Full path of input images should be listed line by line.")
+        predicting_sublayout_bottom.addWidget(self.predictingData, 2, 1)
+        self.loadPredictingData = QPushButton("load data")
+        self.loadPredictingData.clicked.connect(self.load_predicting_data_list)
+        self.loadPredictingData.setFixedWidth(100)
+        predicting_sublayout_bottom.addWidget(self.loadPredictingData, 2, 2)
+
+        predictingPipeData = QVBoxLayout()
+
+        self.predictingPipe = QLabel()
+        predicting_pipe_pixmap = QPixmap("[PATH_TO_BE_MODIFIED]/icon/pipe_gen_v2.png")
+        self.predictingPipe.setPixmap(predicting_pipe_pixmap)
+        self.predictingPipe.setFixedHeight(150)
+        self.predictingPipe.setFixedWidth(20)
+        predictingPipeData.addWidget(self.predictingPipe)
+
+        startPredicting = QVBoxLayout()
+
+        self.modelPredictingFree = QPushButton("")
+        self.modelPredictingFree.setIcon(QPixmap("[PATH_TO_BE_MODIFIED]/icon/Button-Play-icon.png"))
+        self.modelPredictingFree.setToolTip("Click to start training your model.")
+        self.modelPredictingFree.clicked.connect(self.start_model_predicting)
+        self.modelPredictingFree.setFixedHeight(30)
+        self.modelPredictingFree.setFixedWidth(100)
+        startPredicting.addWidget(self.modelPredictingFree)
+
+        self.modelPredictingBusy = QPushButton("")
+        self.modelPredictingBusy.setIcon(QPixmap("[PATH_TO_BE_MODIFIED]/icon/Actions-process-stop-icon.png"))
+        self.modelPredictingBusy.setToolTip("Click to stop training your model.")
+        self.modelPredictingBusy.clicked.connect(self.stop_model_predicting)
+        self.modelPredictingBusy.setFixedHeight(30)
+        self.modelPredictingBusy.setFixedWidth(100)
+        startPredicting.addWidget(self.modelPredictingBusy)
+        self.modelPredictingBusy.setVisible(False)
+
+        self.modelPredictingFreeFrame = QLabel()
+        modelPredictingFreePicture = QPixmap("[PATH_TO_BE_MODIFIED]/icon/spongebob_present.png")
+        self.modelPredictingFreeFrame.setPixmap(modelPredictingFreePicture)
+        startPredicting.addWidget(self.modelPredictingFreeFrame)
+
+        self.modelPredictingBusyFrame = QLabel()
+        self.modelPredictingBusyFrame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.modelPredictingBusyFrame.setAlignment(Qt.AlignCenter)
+        startPredicting.addWidget(self.modelPredictingBusyFrame)
+        self.modelPredictingBusyFrame.setVisible(False)
+        modelPredictingBusyGif = "[PATH_TO_BE_MODIFIED]/icon/spongebob_magic.gif"
+        self.modelPredictingBusyMovie = QMovie(modelPredictingBusyGif, QByteArray(), self) 
+        self.modelPredictingBusyMovie.setCacheMode(QMovie.CacheAll) 
+        self.modelPredictingBusyMovie.setSpeed(100) 
+        self.modelPredictingBusyFrame.setMovie(self.modelPredictingBusyMovie) 
+        self.modelPredictingBusyMovie.start()
+        self.modelPredictingBusyMovie.stop()
+
+        predicting_sublayout.addLayout(predicting_sublayout_top)
+        predicting_sublayout.addLayout(predicting_sublayout_bottom)
+
+        predicting_layout.addLayout(predicting_sublayout)
+        predicting_layout.addLayout(predictingPipeData)
+        predicting_layout.addLayout(startPredicting)
+
+        self.predicting.setLayout(predicting_layout)
+
+
+        #---- job message ----#
+        self.jobMsg = ModelingRunMsgWidget(self)
+
+        #-------------------------------------------------#
+
+        modelPredictionMainLayout.addWidget(self.exportGraph)
+        modelPredictionMainLayout.addWidget(self.predicting)
+        modelPredictionMainLayout.addWidget(self.jobMsg)
+
+        modelPredictionMainLayout.addStretch()
+        modelPredictionAreaLayout.addWidget(self.scrollAreaSetup)        
+        self.setLayout(modelPredictionAreaLayout)
+
+    #=====================================================#
+    #=====================================================#
+
+    def load_trained_model(self):
+        """
+        loading trained model for exporting as an inference graph
+        """
+        FD = QFileDialog(self,"Load Model File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["CKPT file (*.ckpt*.data*)"])
+        if FD.exec_():
+            list_trained_text = str(FD.selectedFiles()[0]).strip().split('/')
+            self.modelPath.setText('/'.join(x for x in list_trained_text[:-1])+'/'+\
+                                   list_trained_text[-1].split('.')[0]+'.'+\
+                                   list_trained_text[-1].split('.')[1])
+
+    def load_model_config(self):
+        """
+        loading the config file of your trained model
+        """
+        FD = QFileDialog(self,"Load Text File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["CONFIG file (*.config)"])
+        if FD.exec_():
+            self.modelConfigPath.setText(str(FD.selectedFiles()[0]))
+
+    def start_export_inference_graph(self):
+        """
+        starting to export inference graph of trained model
+        """
+        #check setting
+        if not os.path.isfile(self.modelPath.text()+'.data-00000-of-00001') or\
+           not os.path.isfile(self.modelPath.text()+'.index') or\
+           not os.path.isfile(self.modelPath.text()+'.meta'):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your input model is not valid or doesn't exist.\n"+\
+                           "           The input text must end in 'model.ckpt' or 'model.ckpt-[DIGITS]'\n"+\
+                           "           There are three files: *.ckpt.data-00000-of-00001, *.ckpt.index\n"+\
+                           "           and *.ckpt.meta.")
+            msgBox.exec_()
+            self.modelPath.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.modelPath.setStyleSheet("")
+
+        if not os.path.isfile(self.modelConfigPath.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your config file is not valid or doesn't exist.")
+            msgBox.exec_()
+            self.modelConfigPath.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.modelConfigPath.setStyleSheet("")
+
+        if os.path.isfile(self.inferenceGraphPath.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Warning)
+            msgBox.setText("Warning: The output graph you assign already exists. Please make\n"+\
+                           "                 sure you want to overwrite it anyway. \n"+\
+                           "                 Exporting will be directly started after you click 'OK'.")
+            msgBox.exec_()
+
+        self.jobMsg.runMessage.clear()
+        self.jobMsg.errorMessage.clear()
+        self.widget_control('exporting')
+
+        self.jobMsg.APM.Popen("python2.7 /volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/export_inference_graph.pyc "\
+                              +"--input_type image_tensor "\
+                              +"--pipeline_config_path "+self.modelConfigPath.text()+" "\
+                              +"--checkpoint_path "+self.modelPath.text()+" "\
+                              +"--inference_graph_path "+self.inferenceGraphPath.text(), \
+                              shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    def stop_export_inference_graph(self):
+        """
+        stopping exporting inference graph
+        """
+        exit_msg = os.system('/ban/yohchang/Release/toolkit_for_deep_learning/kill_jobs.csh export_inference_graph.pyc')
+        time.sleep(5)
+        if exit_msg:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Information)
+            msgBox.setText('Your exporting job is stopped.')
+            msgBox.exec_()
+        else:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Information)
+            msgBox.setText('There is no any exporting job.')
+            msgBox.exec_()
+
+        # widget control
+        self.widget_control("idle")
+
+    def load_label_map_for_predicting(self):
+        """
+        loading label map file for predicting
+        """
+        FD = QFileDialog(self,"Load pb-Text File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["PBTXT file (*.pbtxt)"])
+        if FD.exec_():
+            self.mapTextForPred.setText(str(FD.selectedFiles()[0]))
+
+    def load_inference_graph(self):
+        """
+        loading inference graph for predicting
+        """
+        FD = QFileDialog(self,"Load pb File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["PB file (*.pb)"])
+        if FD.exec_():
+            self.inferenceGraph.setText(str(FD.selectedFiles()[0]))
+
+    def load_predicting_data_list(self):
+        """
+        loading a list of image data as input for predicting
+        """
+        FD = QFileDialog(self,"Load Text File...",directory="./")
+        FD.setAcceptMode(QFileDialog.AcceptOpen)
+        FD.setFileMode(QFileDialog.ExistingFile)
+        FD.setLabelText(QFileDialog.Accept, "Load")
+        FD.setNameFilters(["TXT file (*.txt)"])
+        if FD.exec_():
+            self.predictingData.setText(str(FD.selectedFiles()[0]))
+
+    def start_model_predicting(self):
+        """
+        starting to detecting object(s) from input image(s) 
+        """
+        #check setting
+        if not os.path.isfile(self.inferenceGraph.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your input graph is not valid or doesn't exist.")
+            msgBox.exec_()
+            self.inferenceGraph.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.inferenceGraph.setStyleSheet("")
+
+        if not os.path.isfile(self.mapTextForPred.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: Your label map file is not valid or doesn't exist.")
+            msgBox.exec_()
+            self.mapTextForPred.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.mapTextForPred.setStyleSheet("")
+
+        if not os.path.isfile(self.predictingData.text()):
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Critical)
+            msgBox.setText("Error: The list file (.txt) of your input image data is not valid or doesn't exist.")
+            msgBox.exec_()
+            self.predictingData.setStyleSheet("QLineEdit {background-color: rgb(255, 0, 0)}")
+            return
+        else:
+            self.predictingData.setStyleSheet("")
+
+        self.jobMsg.runMessage.clear()
+        self.jobMsg.errorMessage.clear()
+        self.widget_control('predicting')
+        self.check_num_of_classes_predicting()
+
+        if self.isShowingImageChecked.isChecked():
+            display = 1
+        else:
+            display = 0
+
+        if self.isGrayScaleChecked.isChecked():
+            gray_scale = 1
+        else:
+            gray_scale = 0
+
+        self.jobMsg.APM.Popen("python2.7 /volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/start_object_detection.pyc "\
+                              +self.inferenceGraph.text()+" "\
+                              +self.mapTextForPred.text()+" "\
+                              +str(self.num_classes)+" "\
+                              +self.predictingData.text()+" "\
+                              +str(display)+" "\
+                              +str(gray_scale),
+                              shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    def stop_model_predicting(self):
+        """
+        stopping detecting object(s) process
+        """
+        exit_msg = os.system('/ban/yohchang/Release/toolkit_for_deep_learning/kill_jobs.csh start_object_detection.pyc')
+        time.sleep(5)
+        if exit_msg:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Information)
+            msgBox.setText('Your object-detection job is stopped.')
+            msgBox.exec_()
+        else:
+            msgBox = QMessageBox()
+            msgBox.setIcon(msgBox.Information)
+            msgBox.setText('There is no any object-detection job.')
+            msgBox.exec_()
+
+        # widget control
+        self.widget_control("idle")
+
+    def check_num_of_classes_predicting(self):
+        """
+        checking the number of classes listed in label map for predicting
+        """
+        file_map = open(self.mapTextForPred.text(), 'r')
+
+        self.num_classes = 0
+        for line in file_map.readlines():
+            if 'item' in line.strip() and 'name' not in line.strip():
+                self.num_classes += 1
+
+    def widget_control(self, current_job):
+        """
+        controling widgets among different jobs
+        """
+        if current_job == 'exporting':
+            self.modelPath.setEnabled(False)
+            self.loadModel.setEnabled(False)
+            self.modelConfigPath.setEnabled(False)
+            self.loadModelConfig.setEnabled(False)
+            self.inferenceGraphPath.setEnabled(False)
+            self.runExportFree.setEnabled(False)
+            self.runExportBusy.setEnabled(True)
+            self.runExportFree.setVisible(False)
+            self.runExportBusy.setVisible(True)
+            self.runExportFreeFrame.setVisible(False)
+            self.runExportBusyFrame.setVisible(True)
+            self.runExportBusyMovie.start()
+            self.modelPredictingFree.setEnabled(False)
+            self.modelPredictingBusy.setEnabled(False)
+        elif current_job == 'predicting':
+            self.runExportFree.setEnabled(False)
+            self.runExportBusy.setEnabled(False)
+            self.isShowingImageChecked.setEnabled(False)
+            self.isGrayScaleChecked.setEnabled(False)
+            self.inferenceGraph.setEnabled(False)
+            self.loadinferenceGraph.setEnabled(False)
+            self.mapTextForPred.setEnabled(False)
+            self.loadMapForPred.setEnabled(False)
+            self.predictingData.setEnabled(False) 
+            self.loadPredictingData.setEnabled(False)
+            self.runExportFree.setEnabled(False)
+            self.modelPredictingFree.setEnabled(False)
+            self.modelPredictingBusy.setEnabled(True)
+            self.modelPredictingFree.setVisible(False)
+            self.modelPredictingBusy.setVisible(True)
+            self.modelPredictingFreeFrame.setVisible(False)
+            self.modelPredictingBusyFrame.setVisible(True)
+            self.modelPredictingBusyMovie.start()
+        elif current_job == 'idle':
+            self.modelPath.setEnabled(True)
+            self.loadModel.setEnabled(True)
+            self.modelConfigPath.setEnabled(True)
+            self.loadModelConfig.setEnabled(True)
+            self.inferenceGraphPath.setEnabled(True)
+            self.runExportFree.setEnabled(True)
+            self.runExportBusy.setEnabled(False)
+            self.runExportFree.setVisible(True)
+            self.runExportBusy.setVisible(False)
+            self.runExportFreeFrame.setVisible(True)
+            self.runExportBusyFrame.setVisible(False)
+            self.runExportBusyMovie.stop()
+            self.isShowingImageChecked.setEnabled(True)
+            self.isGrayScaleChecked.setEnabled(True)
+            self.inferenceGraph.setEnabled(True)
+            self.loadinferenceGraph.setEnabled(True)
+            self.mapTextForPred.setEnabled(True)
+            self.loadMapForPred.setEnabled(True)
+            self.predictingData.setEnabled(True) 
+            self.loadPredictingData.setEnabled(True)
+            self.modelPredictingFree.setEnabled(True)
+            self.modelPredictingBusy.setEnabled(False)
+            self.modelPredictingFree.setVisible(True)
+            self.modelPredictingBusy.setVisible(False)
+            self.modelPredictingFreeFrame.setVisible(True)
+            self.modelPredictingBusyFrame.setVisible(False)
+            self.modelPredictingBusyMovie.stop()
+
+
