@@ -1337,7 +1337,7 @@ class ModelPredictionWidget(QWidget):
         self.jobMsg.errorMessage.clear()
         self.widget_control('exporting')
 
-        self.jobMsg.APM.Popen("python2.7 /volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/export_inference_graph.pyc "\
+        self.jobMsg.APM.Popen("python2.7 [PATH_TO_BE_MODIFIED]/export_inference_graph.py "\
                               +"--input_type image_tensor "\
                               +"--pipeline_config_path "+self.modelConfigPath.text()+" "\
                               +"--checkpoint_path "+self.modelPath.text()+" "\
@@ -1348,7 +1348,7 @@ class ModelPredictionWidget(QWidget):
         """
         stopping exporting inference graph
         """
-        exit_msg = os.system('/ban/yohchang/Release/toolkit_for_deep_learning/kill_jobs.csh export_inference_graph.pyc')
+        exit_msg = os.system('[PATH_TO_BE_MODIFIED]/kill_jobs.csh export_inference_graph.py')
         time.sleep(5)
         if exit_msg:
             msgBox = QMessageBox()
@@ -1450,7 +1450,7 @@ class ModelPredictionWidget(QWidget):
         else:
             gray_scale = 0
 
-        self.jobMsg.APM.Popen("python2.7 /volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/start_object_detection.pyc "\
+        self.jobMsg.APM.Popen("python2.7 [PATH_TO_BE_MODIFIED]/start_object_detection.py "\
                               +self.inferenceGraph.text()+" "\
                               +self.mapTextForPred.text()+" "\
                               +str(self.num_classes)+" "\
@@ -1463,7 +1463,7 @@ class ModelPredictionWidget(QWidget):
         """
         stopping detecting object(s) process
         """
-        exit_msg = os.system('/ban/yohchang/Release/toolkit_for_deep_learning/kill_jobs.csh start_object_detection.pyc')
+        exit_msg = os.system('[PATH_TO_BE_MODIFIED]/kill_jobs.csh start_object_detection.py')
         time.sleep(5)
         if exit_msg:
             msgBox = QMessageBox()
@@ -1557,4 +1557,165 @@ class ModelPredictionWidget(QWidget):
             self.modelPredictingBusyFrame.setVisible(False)
             self.modelPredictingBusyMovie.stop()
 
+
+#=====================================================#
+#-------------------  HelpWidget  --------------------#
+#=====================================================#
+class HelpWidget(QWidget):
+    def __init__(self, parent = None):
+        super(HelpWidget, self).__init__(parent = parent)
+        self.parent = parent
+
+        helpAreaLayout = QVBoxLayout()
+
+        helpMainLayout = QVBoxLayout()
+        helpMainLayout.setAlignment(Qt.AlignCenter)
+        helpMainLayout.setContentsMargins(5,5,5,5)
+
+        help_widget = QWidget()
+        help_widget.setLayout(helpMainLayout)
+        self.helpGroup = QGroupBox("")
+        self.helpGroup.resize(718, 300)
+        #self.helpGroup.setMinimumHeight(830)
+
+        self.scrollAreaSetup = QScrollArea()
+        self.scrollAreaSetup.setWidget(help_widget)
+        self.scrollAreaSetup.setWidgetResizable(True)
+
+        helpGroup_layout = QVBoxLayout()
+
+        region_one_helper = QHBoxLayout()
+
+        self.announceLabel = QLabel('AFK is basically a general object-detection tool')
+        self.dummyLabel = QLabel('')
+        helpGroup_layout.addWidget(self.announceLabel)
+        helpGroup_layout.addWidget(self.dummyLabel)
+
+        self.loadLabelMapTxt = QPushButton("open template of label map")
+        self.loadLabelMapTxt.clicked.connect(self.open_template_of_label_map)
+        self.loadLabelMapTxt.setFixedWidth(200)
+        region_one_helper.addWidget(self.loadLabelMapTxt)
+
+        region_one_helper.addStretch()
+        helpGroup_layout.addLayout(region_one_helper)
+
+        self.helpGroup.setLayout(helpGroup_layout)
+        
+        #-------------------------------------------------#
+
+        helpMainLayout.addWidget(self.helpGroup)
+
+        helpMainLayout.addStretch()
+        helpAreaLayout.addWidget(self.scrollAreaSetup)        
+        self.setLayout(helpAreaLayout)
+
+    #=====================================================#
+    #=====================================================#
+
+    def open_template_of_label_map(self):
+        """
+        viewing a template file of label map
+        """
+        os.system('gvim [PATH_TO_BE_MODIFIED]/label_map_template.pbtxt')
+
+
+#===========================================================#
+#-------------------  CustomizedWidget  --------------------#
+#===========================================================#
+class Canvas(FigureCanvas):
+    def __init__(self, parent):
+        self.figure = plt.figure(linewidth = 1, edgecolor='gray')
+        FigureCanvas.__init__(self,self.figure)
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+
+class ClickableLabel(QLabel):
+    clicked = Signal(str)
+
+    def __init__(self, parent = None):
+        super(ClickableLabel, self).__init__(parent = parent)
+
+    def mousePressEvent(self, event):
+        self.clicked.emit(self.objectName())
+
+
+class ModelingRunMsgWidget(QWidget):
+    def __init__(self, parent = None):
+        super(ModelingRunMsgWidget, self).__init__(parent = parent)
+        self.parent = parent
+        runMsg_layout = QVBoxLayout()
+        runInformation= QGroupBox("Information")
+        messageLayout = QVBoxLayout()
+
+        self.runMessage = QTextEdit()
+        self.errorMessage = QTextEdit()
+        self.runMessage.setReadOnly(True)
+        self.errorMessage.setReadOnly(True)
+        self.runMessage.setMinimumHeight(100)
+        self.errorMessage.setMinimumHeight(80)
+        self.runMessage.setMaximumHeight(200)
+        self.errorMessage.setMaximumHeight(150)
+
+        self.APM = AsyncProcessMonitor()
+        self.APM.stdout.connect(self.stdout_treatment)
+        self.APM.stderr.connect(self.stderr_treatment)
+        self.APM.finished.connect(self.next_treatment)
+        messageLayout.addWidget(self.APM)
+        runMs = QLabel("Running Message:")
+        errorMs = QLabel("Error/Warning Message:")
+        messageLayout.addWidget(runMs)
+        messageLayout.addWidget(self.runMessage)
+        messageLayout.addWidget(errorMs)
+        messageLayout.addWidget(self.errorMessage)
+        runInformation.setLayout(messageLayout)
+
+        runMsg_layout.addWidget(runInformation)
+        self.setLayout(runMsg_layout)
+
+    def stdout_treatment(self, stdout):
+        """
+        standard output message
+        """
+        self.runMessage.append(stdout)
+
+    def next_treatment(self):
+        """
+        treatment after completing the mission
+        """
+        self.parent.widget_control('idle')
+
+    def stderr_treatment(self, stderr):
+        """
+        standard error message
+        """
+        self.errorMessage.append(stderr)
+
+
+#=====================================================#
+#-------------------  MainWindow  --------------------#
+#=====================================================# 
+
+class MainWindow(QMainWindow):
+    def __init__(self, parent_object = None, option = None):
+        super(MainWindow, self).__init__()
+        self.setWindowTitle("Object Detection")
+        self.resize(785, 920)
+        self.setMinimumSize(500,700)
+        self.tool = ToolTab(self)
+        self.setCentralWidget(self.tool)
+
+        self.parent_object = parent_object
+
+        #self.show()
+
+
+##=====================================================#
+#def main():
+#    app = QApplication(sys.argv)
+#    main = MainWindow()
+#    sys.exit(app.exec_())                       # excute main interface
+#
+#if __name__ == "__main__":
+#    main()
 
