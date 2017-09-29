@@ -384,7 +384,7 @@ class ObjectDetectionWidget(QWidget):
         topPipeData = QVBoxLayout()
 
         self.pipeGen = QLabel()
-        pipe_gen_pixmap = QPixmap("icon/pipe_gen.png")
+        pipe_gen_pixmap = QPixmap("[PATH_TO_BE_MODIFIED]/icon/pipe_gen.png")
         self.pipeGen.setPixmap(pipe_gen_pixmap)
         self.pipeGen.setFixedHeight(120)
         self.pipeGen.setFixedWidth(20)
@@ -393,7 +393,7 @@ class ObjectDetectionWidget(QWidget):
         topGenData = QVBoxLayout()
 
         self.runGenFree = QPushButton("")
-        self.runGenFree.setIcon(QPixmap("icon/Button-Play-icon.png"))
+        self.runGenFree.setIcon(QPixmap("[PATH_TO_BE_MODIFIED]/icon/Button-Play-icon.png"))
         self.runGenFree.setToolTip("Click to start producing your training record/sample.")
         self.runGenFree.clicked.connect(self.start_tf_sample_production)
         self.runGenFree.setFixedHeight(30)
@@ -401,7 +401,7 @@ class ObjectDetectionWidget(QWidget):
         topGenData.addWidget(self.runGenFree)
 
         self.runGenBusy = QPushButton("")
-        self.runGenBusy.setIcon(QPixmap("icon/Actions-process-stop-icon.png"))
+        self.runGenBusy.setIcon(QPixmap("[PATH_TO_BE_MODIFIED]/icon/Actions-process-stop-icon.png"))
         self.runGenBusy.setToolTip("Click to stop producing your training record/sample.")
         self.runGenBusy.clicked.connect(self.stop_tf_sample_production)
         self.runGenBusy.setFixedHeight(30)
@@ -410,7 +410,7 @@ class ObjectDetectionWidget(QWidget):
         self.runGenBusy.setVisible(False)
 
         self.runGenFreeFrame = QLabel()
-        runGenFreePicture = QPixmap("icon/factory_free.png")
+        runGenFreePicture = QPixmap("[PATH_TO_BE_MODIFIED]/icon/factory_free.png")
         self.runGenFreeFrame.setPixmap(runGenFreePicture)
         topGenData.addWidget(self.runGenFreeFrame)
 
@@ -419,7 +419,7 @@ class ObjectDetectionWidget(QWidget):
         self.runGenBusyFrame.setAlignment(Qt.AlignCenter)
         topGenData.addWidget(self.runGenBusyFrame)
         self.runGenBusyFrame.setVisible(False)
-        runGenBusyGif = "icon/factory_busy_animation.gif"
+        runGenBusyGif = "[PATH_TO_BE_MODIFIED]/icon/factory_busy_animation.gif"
         self.runGenBusyMovie = QMovie(runGenBusyGif, QByteArray(), self) 
         self.runGenBusyMovie.setCacheMode(QMovie.CacheAll) 
         self.runGenBusyMovie.setSpeed(100) 
@@ -428,7 +428,7 @@ class ObjectDetectionWidget(QWidget):
         self.runGenBusyMovie.stop()
 
         #self.runGenBusy = QPushButton("")
-        #self.runGenBusy.setIcon(QPixmap("icon/factory_busy.png"))
+        #self.runGenBusy.setIcon(QPixmap("[PATH_TO_BE_MODIFIED]/icon/factory_busy.png"))
         #self.runGenBusy.setIconSize(QSize(90, 90))
         #self.runGenBusy.setFixedHeight(100)
         #self.runGenBusy.setFixedWidth(100)
@@ -538,7 +538,7 @@ class ObjectDetectionWidget(QWidget):
         trainingPipeData = QVBoxLayout()
 
         self.trainingPipe = QLabel()
-        training_pipe_pixmap = QPixmap("icon/pipe_gen_v2.png")
+        training_pipe_pixmap = QPixmap("[PATH_TO_BE_MODIFIED]/icon/pipe_gen_v2.png")
         self.trainingPipe.setPixmap(training_pipe_pixmap)
         self.trainingPipe.setFixedHeight(150)
         self.trainingPipe.setFixedWidth(20)
@@ -547,7 +547,7 @@ class ObjectDetectionWidget(QWidget):
         startTraining = QVBoxLayout()
 
         self.modelTrainingFree = QPushButton("")
-        self.modelTrainingFree.setIcon(QPixmap("icon/Button-Play-icon.png"))
+        self.modelTrainingFree.setIcon(QPixmap("[PATH_TO_BE_MODIFIED]/icon/Button-Play-icon.png"))
         self.modelTrainingFree.setToolTip("Click to start training your model.")
         self.modelTrainingFree.clicked.connect(self.start_model_training)
         self.modelTrainingFree.setFixedHeight(30)
@@ -555,7 +555,7 @@ class ObjectDetectionWidget(QWidget):
         startTraining.addWidget(self.modelTrainingFree)
 
         self.modelTrainingBusy = QPushButton("")
-        self.modelTrainingBusy.setIcon(QPixmap("icon/Actions-process-stop-icon.png"))
+        self.modelTrainingBusy.setIcon(QPixmap("[PATH_TO_BE_MODIFIED]/icon/Actions-process-stop-icon.png"))
         self.modelTrainingBusy.setToolTip("Click to stop training your model.")
         self.modelTrainingBusy.clicked.connect(self.stop_model_training)
         self.modelTrainingBusy.setFixedHeight(30)
@@ -564,7 +564,7 @@ class ObjectDetectionWidget(QWidget):
         self.modelTrainingBusy.setVisible(False)
 
         self.modelTrainingFreeFrame = QLabel()
-        modelTrainingFreePicture = QPixmap("icon/spongebob_model.png")
+        modelTrainingFreePicture = QPixmap("[PATH_TO_BE_MODIFIED]/icon/spongebob_model.png")
         self.modelTrainingFreeFrame.setPixmap(modelTrainingFreePicture)
         startTraining.addWidget(self.modelTrainingFreeFrame)
 
@@ -573,7 +573,7 @@ class ObjectDetectionWidget(QWidget):
         self.modelTrainingBusyFrame.setAlignment(Qt.AlignCenter)
         startTraining.addWidget(self.modelTrainingBusyFrame)
         self.modelTrainingBusyFrame.setVisible(False)
-        modelTrainingBusyGif = "icon/spongebob_work.gif"
+        modelTrainingBusyGif = "[PATH_TO_BE_MODIFIED]/icon/spongebob_work.gif"
         self.modelTrainingBusyMovie = QMovie(modelTrainingBusyGif, QByteArray(), self) 
         self.modelTrainingBusyMovie.setCacheMode(QMovie.CacheAll) 
         self.modelTrainingBusyMovie.setSpeed(100) 
@@ -682,7 +682,7 @@ class ObjectDetectionWidget(QWidget):
         self.jobMsg.errorMessage.clear()
         self.widget_control('sampling')
 
-        self.jobMsg.APM.Popen("python2.7 /volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/TFRecord_generator.pyc "\
+        self.jobMsg.APM.Popen("python2.7 [PATH_TO_BE_MODIFIED]/TFRecord_generator.py "\
                               +self.annotationPath.text()+" "+self.mapTextForGen.text()+" "+self.imagePath.text(), \
                               shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -690,7 +690,7 @@ class ObjectDetectionWidget(QWidget):
         """
         stopping Tensorflow sample generator
         """
-        exit_msg = os.system('/ban/yohchang/Release/toolkit_for_deep_learning/kill_jobs.csh TFRecord_generator.pyc')
+        exit_msg = os.system('[PATH_TO_BE_MODIFIED]/kill_jobs.csh TFRecord_generator.py')
         time.sleep(5)
         if exit_msg:
             msgBox = QMessageBox()
@@ -857,7 +857,7 @@ class ObjectDetectionWidget(QWidget):
 
         # python2.7 -i, where the option '-i' is necessary. 
         # then we can have normal standard output message and error message
-        self.jobMsg.APM.Popen("python2.7 -i /volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/train.pyc "+\
+        self.jobMsg.APM.Popen("python2.7 -i [PATH_TO_BE_MODIFIED]/train.py "+\
                               "--logtostdout "+\
                               "--pipeline_config_path="+self.outputModelPath.text()+"/faster_resnet_101.config "+\
                               "--train_dir="+self.outputModelPath.text()\
@@ -867,7 +867,7 @@ class ObjectDetectionWidget(QWidget):
         """
         producing the configure file of model
         """
-        file_template = open('/volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/faster_resnet_101_template.config', 'r')
+        file_template = open('[PATH_TO_BE_MODIFIED]/faster_resnet_101_template.config', 'r')
         file_output   = open(self.outputModelPath.text()+'/faster_resnet_101.config', 'w')
 
         for line in file_template.readlines():
@@ -882,7 +882,7 @@ class ObjectDetectionWidget(QWidget):
             elif '[TRAIN_INPUT_PATH]' in line.strip():
                 file_output.write('    input_path: "'+self.trainingData.text()+'"\n')
             elif '[EVAL_INPUT_PATH]' in line.strip():
-                file_output.write('    input_path: "/volp1/quota_ctrl/yohchang/Release/toolkit_for_deep_learning/val.record"\n')
+                file_output.write('    input_path: "[PATH_TO_BE_MODIFIED]/val.record"\n')
             elif '[LABEL_MAP_PATH]' in line.strip():
                 file_output.write('  label_map_path: "'+self.mapTextForMod.text()+'"\n')
             else:
@@ -914,7 +914,7 @@ class ObjectDetectionWidget(QWidget):
         """
         stopping model training
         """
-        exit_msg = os.system('/ban/yohchang/Release/toolkit_for_deep_learning/kill_jobs.csh train.pyc '+self.outputModelPath.text())
+        exit_msg = os.system('[PATH_TO_BE_MODIFIED]/kill_jobs.csh train.py '+self.outputModelPath.text())
         time.sleep(5)
         if exit_msg:
             msgBox = QMessageBox()
