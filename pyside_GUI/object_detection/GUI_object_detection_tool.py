@@ -950,6 +950,7 @@ class ObjectDetectionWidget(QWidget):
             self.modelTrainingBusy.setEnabled(False)
             self.modelTrainingFreeFrame.setEnabled(False)
             self.modelTrainingBusyFrame.setEnabled(False)
+            self.parent.modelPrediction.setEnabled(False)
         elif current_job == 'modeling':
             self.runGenFree.setEnabled(False)
             self.runGenBusy.setEnabled(False)
@@ -969,6 +970,7 @@ class ObjectDetectionWidget(QWidget):
             self.modelTrainingFreeFrame.setVisible(False)
             self.modelTrainingBusyFrame.setVisible(True)
             self.modelTrainingBusyMovie.start()
+            self.parent.modelPrediction.setEnabled(False)
         elif current_job == 'idle':
             self.loadAnnotation.setEnabled(True)
             self.annotationPath.setEnabled(True)
@@ -1003,6 +1005,7 @@ class ObjectDetectionWidget(QWidget):
             self.modelTrainingFreeFrame.setVisible(True)
             self.modelTrainingBusyFrame.setVisible(False)
             self.modelTrainingBusyMovie.stop()
+            self.parent.modelPrediction.setEnabled(True)
 
 
 #=============================================================#
@@ -1509,6 +1512,7 @@ class ModelPredictionWidget(QWidget):
             self.runExportBusyMovie.start()
             self.modelPredictingFree.setEnabled(False)
             self.modelPredictingBusy.setEnabled(False)
+            self.parent.objectDetection.setEnabled(False)
         elif current_job == 'predicting':
             self.runExportFree.setEnabled(False)
             self.runExportBusy.setEnabled(False)
@@ -1528,6 +1532,7 @@ class ModelPredictionWidget(QWidget):
             self.modelPredictingFreeFrame.setVisible(False)
             self.modelPredictingBusyFrame.setVisible(True)
             self.modelPredictingBusyMovie.start()
+            self.parent.objectDetection.setEnabled(False)
         elif current_job == 'idle':
             self.modelPath.setEnabled(True)
             self.loadModel.setEnabled(True)
@@ -1556,6 +1561,7 @@ class ModelPredictionWidget(QWidget):
             self.modelPredictingFreeFrame.setVisible(True)
             self.modelPredictingBusyFrame.setVisible(False)
             self.modelPredictingBusyMovie.stop()
+            self.parent.objectDetection.setEnabled(True)
 
 
 #=====================================================#
