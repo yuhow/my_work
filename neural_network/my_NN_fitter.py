@@ -13,15 +13,26 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 def input_creator(input_x, fcn_name):
+    """
+    return normalized array
+    """
     if fcn_name == "square":
         #return tf.Variable(np.square(input_x))
-        return np.square(input_x)
+        return normalize(np.square(input_x))
     elif fcn_name == "exp":
         #return tf.Variable(np.exp(input_x))
-        return np.exp(input_x)
+        return normalize(np.exp(input_x))
     elif fcn_name == "gauss":
         #return tf.Variable(np.exp(-np.power(input_x, 2.) / (2 * np.power(2, 2.))))
-        return np.exp(-np.power(input_x, 2.) / (2 * np.power(2, 2.)))
+        return normalize(np.exp(-np.power(input_x, 2.) / (2 * np.power(2, 2.))))
+    elif fcn_name == "sin":
+        return normalize(np.sin(input_x))
+
+def normalize(v):
+    norm=np.linalg.norm(v)
+    if norm==0: 
+       return v
+    return v/norm
 
 def add_layer(inputs, in_size, out_size, activation_function=None):
     # add one more layer and return the output of this layer
@@ -36,31 +47,31 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
 
 # global setting
 H1_NEURON = 5
+#DRAWN = True
 
 # Make up some real data and input fitting template(s)
-x_data = np.linspace(-1, 1, 50)[:, np.newaxis]  # np.newaxis adds a new dimension to x_data
+x_data = np.linspace(-1, 1, 100)[:, np.newaxis]  # np.newaxis adds a new dimension to x_data
 fcn_1 = input_creator(x_data, 'square')
 fcn_2 = input_creator(x_data, 'exp')
 fcn_3 = input_creator(x_data, 'gauss')
 
 input_template = np.concatenate((fcn_1, fcn_2, fcn_3), axis=1)
 #print input_template.shape
+num_templates = input_template.shape[1]
 
 noise = np.random.normal(0, 0.05, x_data.shape)  # noise has the same shape as x
 #y_data = np.square(x_data) + np.exp(x_data) - 0.5 + noise  # y = x*x - 0.5 + noise
-y_data = np.square(x_data) + 0.5 + noise  # y = x*x + 0.5 + noise
 #y_data = np.square(x_data) - 0.5  # y = x*x - 0.5
-
-#y_data = np.repeat(y_data.reshape(1,y_data.shape[0]), 2, axis=0)
+y_data = np.square(x_data) + 0.5 + noise  # y = x*x + 0.5 + noise
 
 # define placeholder for inputs to network
 xs = tf.placeholder(tf.float32, [None, 3])
 ys = tf.placeholder(tf.float32, [None, 1])
 
-# Input -> hidden1 -> output
-#   3   ->   5     ->   1
-# add hidden layer (3 in and 5 out)
-l1 = add_layer(xs, 3, H1_NEURON, activation_function=tf.nn.softplus)
+#        input      ->    hidden1      -> output
+#   num_templates   ->   H1_NEURON     ->   1
+# add hidden layer (3 in and 'H1_NEURON' out)
+l1 = add_layer(xs, num_templates, H1_NEURON, activation_function=tf.nn.softplus)
 #l1 = add_layer(xs, 3, H1_NEURON,, activation_function=tf.nn.relu)
 
 # add output layer (10 in and 1 out)
@@ -89,8 +100,10 @@ for k_idx in range(H1_NEURON):
 ax = fig.add_subplot(1, 3, 3)
 frame_seq = []
 
-# background
-#ax_bg.plot()
+fig_loss = plt.figure()                                                                                                                                  
+ax_loss = fig_loss.add_subplot(1, 1, 1)
+loss_value = []
+frame_seq_loss = []
 
 # input fitting templates
 ax_in[0].plot(x_data, fcn_1, c='blue')
@@ -108,10 +121,9 @@ for i in range(10000):
         except Exception:
             pass
 
-        h1_kernels = sess.run(l1, feed_dict={xs: input_template})
-        prediction_value = sess.run(prediction, feed_dict={xs: input_template})
-
         # h1 output
+        h1_kernels = sess.run(l1, feed_dict={xs: input_template})
+
         all_output = []
         for k_idx in range(h1_kernels.shape[1]):
             if i == 0:
@@ -122,6 +134,8 @@ for i in range(10000):
             all_output.append(plot_tmp)
         
         # plot the prediction
+        prediction_value = sess.run(prediction, feed_dict={xs: input_template})
+
         #plt.pause(0.1)
         #frame_seq.append(plt.plot(x_data, prediction_value, 'r-', lw=5))
         ax.set_xlim((np.amin(x_data)-abs(np.amin(x_data)*0.1), np.amax(x_data)+abs(np.amax(x_data)*0.1)))
@@ -131,8 +145,22 @@ for i in range(10000):
         frame_seq.append(tuple(all_output))
 #        frame_seq.append(ax.plot(x_data, prediction_value, 'r.'))
 
+        # cost
+        loss_value.append(sess.run(loss, feed_dict={xs: input_template, ys: y_data}))
+
+        plot_loss = ax_loss.plot(loss_value, 'b-')
+        ax_loss.set_xlabel('epoch (x50)')
+        ax_loss.set_ylabel('loss')
+        ax_loss.set_yscale('log', nonposy='clip')
+        frame_seq_loss.append(plot_loss)
+
+
+# animation of NN
 ani = animation.ArtistAnimation(fig, frame_seq, interval=250, blit=True, repeat=False)
 ax.scatter(x_data, y_data)
+
+# animation of loss
+ani_loss = animation.ArtistAnimation(fig_loss, frame_seq_loss, interval=250, blit=True, repeat=False)
 
 plt.tight_layout()
 
